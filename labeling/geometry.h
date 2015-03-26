@@ -9,12 +9,34 @@ namespace geom2
     template<class T>
     struct point
     {
+        point();
+        //point(const point &); default
+        point(T x, T y);
         T x;
         T y;
+        //point& operator=(const point &other); default
         point operator+(const point &other) const;
         point operator-(const point &other) const;
         double norm() const;
+        T sqr_norm() const;
     };
+
+
+    template<class T>
+    point<T>::point()
+        :
+          x(),
+          y()
+    {
+    }
+
+    template<class T>
+    point<T>::point(T x, T y)
+        :
+          x(x),
+          y(y)
+    {
+    }
 
     template<class T>
     point<T> point<T>::operator+(const point &other) const
@@ -37,7 +59,13 @@ namespace geom2
     template<class T>
     double point<T>::norm() const
     {
-        return std::sqrt(x * x + y * y);
+        return std::sqrt(sqr_norm());
+    }
+
+    template<class T>
+    T point<T>::sqr_norm() const
+    {
+        return x * x + y * y;
     }
 
     typedef point<int> point_i;
@@ -106,6 +134,12 @@ namespace geom2
     double points_distance(const point<T> &l, const point<T> &r)
     {
         return (r - l).norm();
+    }
+
+    template<class T>
+    T sqr_points_distance(const point<T> &l, const point<T> &r)
+    {
+        return (r - l).sqr_norm();
     }
 
 } // namespace geom2

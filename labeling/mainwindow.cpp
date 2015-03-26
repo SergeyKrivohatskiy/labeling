@@ -27,30 +27,20 @@ MainWindow::MainWindow(QWidget *parent) :
 
     //TODO remove this block
     {
-        geom2::segment_i s;
-        s.start.x = s.start.y = 0;
-        s.end.x = s.end.y = 500;
+        geom2::segment_i s{{0, 0}, {500, 500}};
 
-        rectangle_i r;
-        r.left_bottom.x = 65;
-        r.left_bottom.y = 124;
-        r.size.h = r.size.w = 123;
+        rectangle_i r{{65, 124}, {125, 125}};
 
         screen_obstacles.push_back(
                     std::unique_ptr<base_screen_obstacle>(new base_screen_obstacle(s)));
         screen_obstacles.push_back(
                     std::unique_ptr<base_screen_obstacle>(new base_screen_obstacle(r)));
 
-        size_i field_size;
-        field_size.w = 800;
-        field_size.h = 600;
+        size_i field_size{800, 600};
         for(int i = 0; i < 20; ++i)
         {
-            point_i pos, speed;
-            pos.x = rand() % field_size.w;
-            pos.y = rand() % field_size.h;
-            speed.x = rand() % 20 - 10;
-            speed.y = rand() % 20 - 10;
+            point_i pos(rand() % field_size.w, rand() % field_size.h);
+            point_i speed(rand() % 20 - 10, rand() % 20 - 10);
             auto new_point = new labeling::test_point_feature(pos, speed, field_size);
             screen_points.push_back(std::unique_ptr<screen_point_feature>(new_point));
             pos_optimizer->register_label(new_point);
@@ -67,7 +57,6 @@ void MainWindow::update()
     for(auto it = screen_points.begin(); it != screen_points.end(); ++it)
     {
         static_cast<labeling::test_point_feature&>(**it).update_position();
-
     }
 
     int summ_intersection_before = labels_intersection();
@@ -127,10 +116,11 @@ void MainWindow::paintEvent(QPaintEvent *)
         const point_i &offset = point->get_label_offset();
         const size_i &label_size = point->get_label_size();
         painter.setPen(QPen(Qt::blue, 1));
-        painter.drawLine(point_pos.x + offset.x, point_pos.y + offset.y,
+        point_i label_left_bottom = point_pos + offset;
+        painter.drawLine(label_left_bottom.x, label_left_bottom.y,
                          point_pos.x, point_pos.y);
         painter.setPen(QPen(Qt::blue, 3));
-        painter.drawRect(point_pos.x + offset.x, point_pos.y + offset.y,
+        painter.drawRect(label_left_bottom.x, label_left_bottom.y,
                          label_size.w, label_size.h);
     }
 }
