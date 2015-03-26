@@ -17,7 +17,8 @@ SOURCES += main.cpp\
     base_screen_obstacle.cpp \
     test_point_feature.cpp \
     simple_optimizer.cpp \
-    screen_point_feature.cpp
+    screen_point_feature.cpp \
+    geom2_to_qt.cpp
 
 HEADERS  += mainwindow.h \
     geometry.h \
@@ -26,6 +27,7 @@ HEADERS  += mainwindow.h \
     positions_optimizer.h \
     base_screen_obstacle.h \
     test_point_feature.h \
-    simple_optimizer.h
+    simple_optimizer.h \
+    geom2_to_qt.h
 
 FORMS    += mainwindow.ui

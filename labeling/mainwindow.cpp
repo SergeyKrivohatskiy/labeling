@@ -7,10 +7,9 @@
 #include "screen_obstacle.h"
 #include "test_point_feature.h"
 #include "simple_optimizer.h"
+#include "geom2_to_qt.h"
 
-using geom2::point_i;
-using geom2::size_i;
-using geom2::rectangle_i;
+using namespace geom2;
 using labeling::screen_obstacle;
 using labeling::screen_point_feature;
 using labeling::base_screen_obstacle;
@@ -27,7 +26,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     //TODO remove this block
     {
-        geom2::segment_i s{{0, 0}, {500, 500}};
+        segment_i s{{0, 0}, {500, 500}};
 
         rectangle_i r{{65, 124}, {125, 125}};
 
@@ -96,14 +95,10 @@ void MainWindow::paintEvent(QPaintEvent *)
         screen_obstacle *obstacle = (*it).get();
         if(obstacle->get_type() == screen_obstacle::segment)
         {
-            const point_i &start = obstacle->get_segment()->start;
-            const point_i &end = obstacle->get_segment()->end;
             painter.setPen(QPen(Qt::yellow, 4));
-            painter.drawLine(start.x, start.y, end.x, end.y);
+            painter.drawLine(to_qt(*obstacle->get_segment()));
         } else {
-            const point_i &left_bottom = obstacle->get_box()->left_bottom;
-            const size_i &size = obstacle->get_box()->size;
-            painter.fillRect(left_bottom.x, left_bottom.y, size.w, size.h, Qt::yellow);
+            painter.fillRect(to_qt(*obstacle->get_box()), Qt::yellow);
         }
     }
 
@@ -111,17 +106,14 @@ void MainWindow::paintEvent(QPaintEvent *)
     {
         screen_point_feature *point = (*it).get();
         painter.setPen(QPen(Qt::blue, 10));
-        const point_i &point_pos = point->get_screen_pivot();
-        painter.drawPoint(point_pos.x, point_pos.y);
-        const point_i &offset = point->get_label_offset();
-        const size_i &label_size = point->get_label_size();
+        painter.drawPoint(to_qt(point->get_screen_pivot()));
         painter.setPen(QPen(Qt::blue, 1));
-        point_i label_left_bottom = point_pos + offset;
-        painter.drawLine(label_left_bottom.x, label_left_bottom.y,
-                         point_pos.x, point_pos.y);
+        QPoint label_left_bottom =
+                to_qt(point->get_screen_pivot() + point->get_label_offset());
+        painter.drawLine(label_left_bottom,
+                         to_qt(point->get_screen_pivot()));
         painter.setPen(QPen(Qt::blue, 3));
-        painter.drawRect(label_left_bottom.x, label_left_bottom.y,
-                         label_size.w, label_size.h);
+        painter.drawRect(QRect(label_left_bottom, to_qt(point->get_label_size())));
     }
 }
 
