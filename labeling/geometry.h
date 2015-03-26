@@ -1,6 +1,8 @@
 #ifndef GEOMETRY
 #define GEOMETRY
 #include <vector>
+#include <algorithm>
+#include <math.h>
 
 namespace geom2
 {
@@ -9,7 +11,34 @@ namespace geom2
     {
         T x;
         T y;
+        point operator+(const point &other) const;
+        point operator-(const point &other) const;
+        double norm() const;
     };
+
+    template<class T>
+    point<T> point<T>::operator+(const point &other) const
+    {
+        point new_point;
+        new_point.x = x + other.x;
+        new_point.y = y + other.y;
+        return new_point;
+    }
+
+    template<class T>
+    point<T> point<T>::operator-(const point &other) const
+    {
+        point new_point;
+        new_point.x = x - other.x;
+        new_point.y = y - other.y;
+        return new_point;
+    }
+
+    template<class T>
+    double point<T>::norm() const
+    {
+        return std::sqrt(x * x + y * y);
+    }
 
     typedef point<int> point_i;
     typedef point<float> point_f;
@@ -50,6 +79,35 @@ namespace geom2
     typedef rectangle<double> rectangle_d;
 
     typedef std::vector<point_i> points_i_list;
+
+    template<class T>
+    bool value_in_range(const T &value, const T &l, const T &r)
+    {
+        return value >= l && value <= r;
+    }
+
+    // Rectangle sizes should be >= 0
+    template<class T>
+    T rectangle_intersection(const rectangle<T> &l, const rectangle<T> &r)
+    {
+        const T &x_top = std::max(l.left_bottom.x, r.left_bottom.x);
+        const T &y_top = std::max(l.left_bottom.y, r.left_bottom.y);
+        const T &x_bot = std::min(l.left_bottom.x + l.size.w, r.left_bottom.x + r.size.w);
+        const T &y_bot = std::min(l.left_bottom.y + l.size.h, r.left_bottom.y + r.size.h);
+        if(x_top >= x_bot || y_top >= y_bot)
+        {
+            return T();
+        }
+
+        return (x_top - x_bot) * (y_top - y_bot);
+    }
+
+    template<class T>
+    double points_distance(const point<T> &l, const point<T> &r)
+    {
+        return (r - l).norm();
+    }
+
 } // namespace geom2
 
 

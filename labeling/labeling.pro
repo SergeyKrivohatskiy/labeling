@@ -16,7 +16,8 @@ SOURCES += main.cpp\
         mainwindow.cpp \
     base_screen_obstacle.cpp \
     test_point_feature.cpp \
-    simple_optimizer.cpp
+    simple_optimizer.cpp \
+    screen_point_feature.cpp
 
 HEADERS  += mainwindow.h \
     geometry.h \

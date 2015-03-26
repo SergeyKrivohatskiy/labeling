@@ -36,6 +36,9 @@ private:
     float time_to_optimize;
     screen_obstacles_t screen_obstacles;
     screen_points_t screen_points;
+
+private:
+    int labels_intersection();
 };
 
 #endif // MAINWINDOW_H
