@@ -58,29 +58,31 @@ void MainWindow::update()
         static_cast<labeling::test_point_feature&>(**it).update_position();
     }
 
-    int summ_intersection_before = labels_intersection();
+    double metric_before = static_cast<labeling::simple_optimizer*>
+            (pos_optimizer.get())->metric();
 
     QElapsedTimer ellapsed_timer;
     ellapsed_timer.start();
     pos_optimizer->best_fit(time_to_optimize);
-    qint32 ellapsed_ms = ellapsed_timer.nsecsElapsed() / 1000;
+    qint32 ellapsed_ms = ellapsed_timer.nsecsElapsed() / 1000 / 1000;
 
-    int summ_intersection_after = labels_intersection();
+    double metric_after = static_cast<labeling::simple_optimizer*>
+            (pos_optimizer.get())->metric();
 
     QString newStatus = QString("time limit: %1 ms\n"
                                 "actual time: %2 ms\n"
                                 "obstacles count: %3\n"
                                 "points count: %4\n"
-                                "labels intersection before: %5\n"
-                                "labels intersection after: %6\n"
-                                "labels intersection diff: %7\n")
+                                "metric before: %5\n"
+                                "metric after: %6\n"
+                                "metric diff: %7\n")
             .arg(time_to_optimize)
             .arg(ellapsed_ms)
             .arg(screen_obstacles.size())
             .arg(screen_points.size())
-            .arg(summ_intersection_before)
-            .arg(summ_intersection_after)
-            .arg(summ_intersection_before - summ_intersection_after);
+            .arg(metric_before)
+            .arg(metric_after)
+            .arg(metric_before - metric_after);
     ui->status_label->setText(newStatus);
 
     QMainWindow::update();
@@ -115,23 +117,6 @@ void MainWindow::paintEvent(QPaintEvent *)
         painter.setPen(QPen(Qt::blue, 3));
         painter.drawRect(QRect(label_left_bottom, to_qt(point->get_label_size())));
     }
-}
-
-int MainWindow::labels_intersection()
-{
-    int summ = 0;
-    for(auto &point_ptr1: screen_points)
-    {
-        for(auto &point_ptr2: screen_points)
-        {
-            if(point_ptr1 == point_ptr2)
-            {
-                continue;
-            }
-            summ += labeling::labels_intersection(*point_ptr1, *point_ptr2);
-        }
-    }
-    return summ;
 }
 
 MainWindow::~MainWindow()
