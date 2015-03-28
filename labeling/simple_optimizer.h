@@ -21,18 +21,18 @@ namespace labeling
 
         double metric() const;
     private:
-        typedef std::set<screen_point_feature*> points_set_t;
-        typedef std::pair<geom2::point_i, screen_point_feature*> new_pos_t;
-        typedef std::vector<new_pos_t> state_t;
+        typedef std::vector<screen_point_feature*> points_list_t;
+        typedef std::vector<geom2::point_i> state_t;
     private:
-        points_set_t points_set;
+        points_list_t points_list;
+        state_t old_positions;
     private:
         state_t init_state() const;
         double metric(const state_t &state) const;
         void apply_state(const state_t &state);
     private:
         static bool do_jump(double t, double d_metrics);
-        static double get_new_t(double t);
+        static double get_new_t(int iterations);
         static state_t update_state(const state_t &state);
     };
 } // namespace labeling

@@ -20,12 +20,13 @@ namespace labeling
 
     void simple_optimizer::register_label(screen_point_feature *point_ptr)
     {
-        points_set.insert(point_ptr);
+        points_list.push_back(point_ptr);
+        old_positions.push_back(point_ptr->get_label_offset());
     }
 
-    void simple_optimizer::unregister_label(screen_point_feature *point_ptr)
+    void simple_optimizer::unregister_label(screen_point_feature *)
     {
-        points_set.erase(point_ptr);
+        // TODO
     }
 
     void simple_optimizer::register_obstacle(screen_obstacle *)
@@ -42,25 +43,26 @@ namespace labeling
     simple_optimizer::state_t simple_optimizer::init_state() const
     {
         state_t state;
-        state.reserve(points_set.size());
-        for(auto point_ptr: points_set)
+        state.reserve(points_list.size());
+        for(auto point_ptr: points_list)
         {
-            state.push_back(new_pos_t(point_ptr->get_label_offset(), point_ptr));
+            state.push_back(point_ptr->get_label_offset());
         }
         return state;
     }
 
     void simple_optimizer::apply_state(const state_t &state)
     {
-        for(const new_pos_t &new_pos: state)
+        for(size_t i = 0; i < state.size(); ++i)
         {
-            new_pos.second->set_label_offset(new_pos.first);
+            points_list[i]->set_label_offset(state[i]);
         }
+        old_positions = state;
     }
 
-    double simple_optimizer::get_new_t(double t)
+    double simple_optimizer::get_new_t(int iterations)
     {
-        return t * 0.92;
+        return 1.0 / iterations / iterations;
     }
 
     bool simple_optimizer::do_jump(double t, double d_metrics)
@@ -72,7 +74,7 @@ namespace labeling
     {
         state_t new_state(state);
         size_t idx = rand() % new_state.size();
-        new_state[idx].first = new_state[idx].first + point_i(rand() % 10 - 5, rand() % 10 - 5);
+        new_state[idx] = new_state[idx] + point_i(rand() % 20 - 10, rand() % 20 - 10);
         return new_state;
     }
 
@@ -84,20 +86,23 @@ namespace labeling
     double simple_optimizer::metric(const state_t &state) const
     {
         double summ = 0;
-        for(const new_pos_t &new_pos: state)
+        for(size_t i = 0; i < state.size(); ++i)
         {
-            summ += points_distance(new_pos.first, new_pos.second->labels_best_positions()[0]);
-            for(auto point_ptr: points_set)
+            const point_i &new_offset = state[i];
+            const screen_point_feature *point_ptr1 = points_list[i];
+            summ += 0.5 * points_distance(new_offset, old_positions[i]);
+            summ += points_distance(new_offset, point_ptr1->labels_best_positions()[0]);
+            for(const screen_point_feature *point_ptr2: points_list)
             {
-                if(point_ptr == new_pos.second)
+                if(point_ptr2 == point_ptr1)
                 {
                     continue;
                 }
                 rectangle_i new_rect  =
-                    {new_pos.first + new_pos.second->get_screen_pivot(),
-                     new_pos.second->get_label_size()};
+                    {new_offset + point_ptr1->get_screen_pivot(),
+                     point_ptr1->get_label_size()};
 
-                summ += rectangle_intersection(point_ptr->get_label_rect(), new_rect);
+                summ += rectangle_intersection(point_ptr2->get_label_rect(), new_rect);
             }
         }
         return summ;
@@ -131,7 +136,7 @@ namespace labeling
                 state = new_state;
                 state_metric = new_state_metric;
             }
-            t = get_new_t(t);
+            t = get_new_t(iterations);
             iterations += 1;
             current_time = (duration_cast<milliseconds>(high_resolution_clock::now() - start)).count();
         } while(t > 0 && current_time < time_max);

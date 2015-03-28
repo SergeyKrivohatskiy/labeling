@@ -19,7 +19,7 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
     timer(new QTimer()),
-    time_to_optimize(100),
+    time_to_optimize(400),
     pos_optimizer(new labeling::simple_optimizer())
 {
     ui->setupUi(this);
