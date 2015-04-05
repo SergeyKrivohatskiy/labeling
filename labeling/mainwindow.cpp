@@ -19,7 +19,7 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
     timer(new QTimer()),
-    time_to_optimize(400),
+    time_to_optimize(50),
     pos_optimizer(new labeling::simple_optimizer())
 {
     ui->setupUi(this);
@@ -36,10 +36,10 @@ MainWindow::MainWindow(QWidget *parent) :
                     std::unique_ptr<base_screen_obstacle>(new base_screen_obstacle(r)));
 
         size_i field_size{800, 600};
-        for(int i = 0; i < 20; ++i)
+        for(int i = 0; i < 14; ++i)
         {
             point_i pos(rand() % field_size.w, rand() % field_size.h);
-            point_i speed(rand() % 20 - 10, rand() % 20 - 10);
+            point_i speed(rand() % 3 - 1, rand() % 3 - 1);
             auto new_point = new labeling::test_point_feature(pos, speed, field_size);
             screen_points.push_back(std::unique_ptr<screen_point_feature>(new_point));
             pos_optimizer->register_label(new_point);

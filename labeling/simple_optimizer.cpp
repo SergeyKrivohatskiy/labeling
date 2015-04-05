@@ -2,12 +2,16 @@
 #include <chrono>
 #include <math.h>
 #include <random>
+#include <limits>
+#include <QtDebug>
 
 
 using namespace geom2;
 using std::chrono::high_resolution_clock;
 using std::chrono::milliseconds;
 using std::chrono::duration_cast;
+using std::min;
+typedef std::numeric_limits<double> double_limits;
 
 namespace labeling
 {
@@ -70,12 +74,11 @@ namespace labeling
         return rand() < (RAND_MAX * exp(-d_metrics / t));
     }
 
-    simple_optimizer::state_t simple_optimizer::update_state(const state_t &state)
+    simple_optimizer::dstate_t simple_optimizer::update_state(const state_t &state)
     {
-        state_t new_state(state);
-        size_t idx = rand() % new_state.size();
-        new_state[idx] = new_state[idx] + point_i(rand() % 20 - 10, rand() % 20 - 10);
-        return new_state;
+        size_t idx = rand() % state.size();
+        point_i d_pos = point_i(rand() % 10 - 5, rand() % 10 - 5);
+        return dstate_t(idx, d_pos);
     }
 
     double simple_optimizer::metric() const
@@ -90,19 +93,47 @@ namespace labeling
         {
             const point_i &new_offset = state[i];
             const screen_point_feature *point_ptr1 = points_list[i];
-            summ += 0.5 * points_distance(new_offset, old_positions[i]);
-            summ += points_distance(new_offset, point_ptr1->labels_best_positions()[0]);
-            for(const screen_point_feature *point_ptr2: points_list)
+
+            double d_offset = sqr_points_distance(new_offset, old_positions[i]);
+            if (d_offset != 0)
             {
-                if(point_ptr2 == point_ptr1)
+                summ += 10 * d_offset + 30;
+            }
+
+            double best_pos_penalty =
+                    2 * point_to_points_metric(
+                        new_offset, point_ptr1->labels_best_positions());
+            double good_pos_penalty =
+                    1 * point_to_points_metric(
+                        new_offset, point_ptr1->labels_good_positions());
+            double min_penalty = min(best_pos_penalty, good_pos_penalty);
+            min_penalty = min_penalty == double_limits::max() ? 0 : min_penalty;
+            if (min_penalty != 0) {
+                summ += min_penalty;
+                summ += 100;
+            }
+
+            double labels_intersection = 0;
+            for(size_t j = 0; j < state.size(); ++j)
+            {
+                if(i == j)
                 {
                     continue;
                 }
-                rectangle_i new_rect  =
+                rectangle_i new_rect1 =
                     {new_offset + point_ptr1->get_screen_pivot(),
                      point_ptr1->get_label_size()};
+                rectangle_i new_rect2 =
+                    {state[j] + points_list[j]->get_screen_pivot(),
+                     points_list[j]->get_label_size()};
 
-                summ += rectangle_intersection(point_ptr2->get_label_rect(), new_rect);
+                labels_intersection += rectangle_intersection(new_rect1, new_rect2);
+            }
+
+            if(labels_intersection != 0)
+            {
+                summ += labels_intersection;
+                summ += 300;
             }
         }
         return summ;
@@ -123,18 +154,20 @@ namespace labeling
         int64_t current_time;
         do
         {
-            state_t new_state = update_state(state);
+            dstate_t d_state = update_state(state);
+            state[d_state.first] = state[d_state.first] + d_state.second;
 
-            double new_state_metric = metric(new_state);
+            double new_state_metric = metric(state);
             if(state_metric > new_state_metric || do_jump(t, new_state_metric - state_metric))
             {
                 if(min_metric > new_state_metric)
                 {
-                    min_state = new_state;
+                    min_state = state;
                     min_metric = new_state_metric;
                 }
-                state = new_state;
                 state_metric = new_state_metric;
+            } else {
+                state[d_state.first] = state[d_state.first] - d_state.second;
             }
             t = get_new_t(iterations);
             iterations += 1;
@@ -143,5 +176,18 @@ namespace labeling
 
 
         apply_state(min_state);
+        qDebug() << iterations << " iterations";
+    }
+
+    double simple_optimizer::point_to_points_metric(
+            const point_i &point, const points_i_list &points)
+    {
+        double min_distance = double_limits::max();
+        for(const point_i &second_point: points)
+        {
+            double cur_distance = sqr_points_distance(point, second_point);
+            min_distance = min(min_distance, cur_distance);
+        }
+        return min_distance;
     }
 } // namespace labeling

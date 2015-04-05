@@ -23,6 +23,7 @@ namespace labeling
     private:
         typedef std::vector<screen_point_feature*> points_list_t;
         typedef std::vector<geom2::point_i> state_t;
+        typedef std::pair<size_t, geom2::point_i> dstate_t;
     private:
         points_list_t points_list;
         state_t old_positions;
@@ -33,7 +34,12 @@ namespace labeling
     private:
         static bool do_jump(double t, double d_metrics);
         static double get_new_t(int iterations);
-        static state_t update_state(const state_t &state);
+        static dstate_t update_state(const state_t &state);
+
+        // returns closest distance between point and points
+        // or double max value if points.size() == 0
+        static double point_to_points_metric(const geom2::point_i &point,
+                                             const geom2::points_i_list &points);
     };
 } // namespace labeling
 #endif // SIMPLE_OPTIMIZER_H
