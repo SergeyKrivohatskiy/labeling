@@ -81,20 +81,12 @@ namespace labeling
         return dstate_t(idx, d_pos);
     }
 
-    double simple_optimizer::dmetric(const state_t &state, const dstate_t &d_state) const
-    {
-        size_t i = d_state.first;
-        return calc_metric(state, dstate_t(i, state[i] + d_state.second)) -
-                calc_metric(state, dstate_t(i, state[i]));
-    }
-
-    double simple_optimizer::calc_metric(const state_t &state, const dstate_t &d_state) const
+    double simple_optimizer::calc_metric(const state_t &state, size_t i, const point_i &offset_change) const
     {
         double summ = 0;
 
-        size_t i = d_state.first;
-        const point_i &new_offset = d_state.second;
         const screen_point_feature *point_ptr1 = points_list[i];
+        point_i new_offset = state[i] + offset_change;
 
         double d_offset = sqr_points_distance(new_offset, old_positions[i]);
         if (d_offset != 0)
@@ -146,6 +138,14 @@ namespace labeling
         auto start = high_resolution_clock::now();
 
         state_t state = init_state();
+        std::vector<double> metrics(state.size());
+        {
+            point_i zero_offset;
+            for(size_t i = 0; i < state.size(); ++i)
+            {
+                metrics[i] = calc_metric(state, i, zero_offset);
+            }
+        }
 
         int iterations = 0;
         int64_t current_time;
@@ -153,9 +153,10 @@ namespace labeling
         {
             dstate_t d_state = update_state(state);
 
-            double d_metric = dmetric(state, d_state);
+            double d_metric = calc_metric(state, d_state.first, d_state.second) - metrics[d_state.first];
             if(d_metric < 0 || do_jump(t, d_metric))
             {
+                metrics[d_state.first] += d_metric;
                 state[d_state.first] = state[d_state.first] + d_state.second;
             }
             t = get_new_t(iterations);
