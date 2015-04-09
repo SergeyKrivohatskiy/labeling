@@ -18,8 +18,6 @@ namespace labeling
         void unregister_obstacle(screen_obstacle *);
 
         void best_fit(float time_max);
-
-        double metric() const;
     private:
         typedef std::vector<screen_point_feature*> points_list_t;
         typedef std::vector<geom2::point_i> state_t;
@@ -29,7 +27,8 @@ namespace labeling
         state_t old_positions;
     private:
         state_t init_state() const;
-        double metric(const state_t &state) const;
+        double dmetric(const state_t &state, const dstate_t &d_state) const;
+        double calc_metric(const state_t &state, const dstate_t &d_state) const;
         void apply_state(const state_t &state);
     private:
         static bool do_jump(double t, double d_metrics);

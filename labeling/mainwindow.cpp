@@ -36,7 +36,7 @@ MainWindow::MainWindow(QWidget *parent) :
                     std::unique_ptr<base_screen_obstacle>(new base_screen_obstacle(r)));
 
         size_i field_size{800, 600};
-        for(int i = 0; i < 14; ++i)
+        for(int i = 0; i < 20; ++i)
         {
             point_i pos(rand() % field_size.w, rand() % field_size.h);
             point_i speed(rand() % 3 - 1, rand() % 3 - 1);
@@ -58,31 +58,19 @@ void MainWindow::update()
         static_cast<labeling::test_point_feature&>(**it).update_position();
     }
 
-    double metric_before = static_cast<labeling::simple_optimizer*>
-            (pos_optimizer.get())->metric();
-
     QElapsedTimer ellapsed_timer;
     ellapsed_timer.start();
     pos_optimizer->best_fit(time_to_optimize);
     qint32 ellapsed_ms = ellapsed_timer.nsecsElapsed() / 1000 / 1000;
 
-    double metric_after = static_cast<labeling::simple_optimizer*>
-            (pos_optimizer.get())->metric();
-
     QString newStatus = QString("time limit: %1 ms\n"
                                 "actual time: %2 ms\n"
                                 "obstacles count: %3\n"
-                                "points count: %4\n"
-                                "metric before: %5\n"
-                                "metric after: %6\n"
-                                "metric diff: %7\n")
+                                "points count: %4\n")
             .arg(time_to_optimize)
             .arg(ellapsed_ms)
             .arg(screen_obstacles.size())
-            .arg(screen_points.size())
-            .arg(metric_before)
-            .arg(metric_after)
-            .arg(metric_before - metric_after);
+            .arg(screen_points.size());
     ui->status_label->setText(newStatus);
 
     QMainWindow::update();
