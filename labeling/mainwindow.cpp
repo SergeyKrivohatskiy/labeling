@@ -24,31 +24,34 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    //TODO remove this block
-    {
-        segment_i s{{0, 0}, {500, 500}};
-
-        rectangle_i r{{65, 124}, {125, 125}};
-
-        screen_obstacles.push_back(
-                    std::unique_ptr<base_screen_obstacle>(new base_screen_obstacle(s)));
-        screen_obstacles.push_back(
-                    std::unique_ptr<base_screen_obstacle>(new base_screen_obstacle(r)));
-
-        size_i field_size{800, 600};
-        for(int i = 0; i < 30; ++i)
-        {
-            point_i pos(rand() % field_size.w, rand() % field_size.h);
-            point_i speed(rand() % 3 - 1, rand() % 3 - 1);
-            auto new_point = new labeling::test_point_feature(pos, speed, field_size);
-            screen_points.push_back(std::unique_ptr<screen_point_feature>(new_point));
-            pos_optimizer->register_label(new_point);
-        }
-    }
+    fill_screen(20, 5, 1);
 
     connect(timer.get(), SIGNAL(timeout()), this, SLOT(update()));
     update();
     timer->start(UPDATE_TIME_MS);
+}
+
+void MainWindow::fill_screen(int points_count, int obstacles_count, int max_speed)
+{
+    size_i field_size{800, 600};
+    for(int i = 0; i < points_count; ++i)
+    {
+        point_i pos(rand() % field_size.w, rand() % field_size.h);
+        point_i speed(rand() % (2 * max_speed + 1) - max_speed,
+                      rand() % (2 * max_speed + 1) - max_speed);
+        auto new_point = new labeling::test_point_feature(pos, speed, field_size);
+        screen_points.push_back(std::unique_ptr<screen_point_feature>(new_point));
+        pos_optimizer->register_label(new_point);
+    }
+
+    for(int i = 0; i < obstacles_count; ++i)
+    {
+        point_i pos(rand() % field_size.w, rand() % field_size.h);
+        size_i size{rand() % 150 + 50, rand() % 20 + 20};
+        screen_obstacle *new_obstacle = new base_screen_obstacle(rectangle_i{pos, size});
+        screen_obstacles.push_back(std::unique_ptr<screen_obstacle>(new_obstacle));
+        pos_optimizer->register_obstacle(new_obstacle);
+    }
 }
 
 void MainWindow::update()

@@ -11,10 +11,12 @@ namespace labeling
           speed(speed),
           field_size(field_size)
     {
-        label_size.h = 20;
+        label_size.h = 40;
         label_size.w = 100;
         label_offset.x = label_offset.y = 40;
         best_positions.push_back(label_offset);
+        best_positions.push_back(point_i{-40, 40});
+        good_positions.push_back(point_i{40, -40});
     }
 
     test_point_feature::~test_point_feature()
@@ -46,7 +48,7 @@ namespace labeling
 
     const points_i_list& test_point_feature::labels_good_positions() const
     {
-        return empty_list;
+        return good_positions;
     }
 
     void test_point_feature::update_position()

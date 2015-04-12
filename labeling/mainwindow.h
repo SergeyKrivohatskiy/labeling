@@ -7,7 +7,7 @@
 #include <vector>
 #include "positions_optimizer.h"
 
-const int UPDATE_TIME_MS = 60;
+const int UPDATE_TIME_MS = 40;
 
 namespace Ui {
 class MainWindow;
@@ -23,6 +23,8 @@ public:
 
 protected:
     void paintEvent(QPaintEvent *);
+private:
+    void fill_screen(int points_count, int obstacles_count, int max_speed);
 private slots:
     void update();
 

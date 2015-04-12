@@ -3,7 +3,10 @@
 #include <math.h>
 #include <random>
 #include <limits>
+#define DEBUG
+#ifdef DEBUG
 #include <QtDebug>
+#endif
 
 
 using namespace geom2;
@@ -33,14 +36,15 @@ namespace labeling
         // TODO
     }
 
-    void simple_optimizer::register_obstacle(screen_obstacle *)
+    void simple_optimizer::register_obstacle(screen_obstacle *obstacle_ptr)
     {
-        // TODO
+        obstacles_list.push_back(obstacle_ptr);
     }
 
-    void simple_optimizer::unregister_obstacle(screen_obstacle *)
+    void simple_optimizer::unregister_obstacle(screen_obstacle *obstacle_ptr)
     {
-        // TODO
+        obstacles_list.erase(
+                    std::find(obstacles_list.begin(), obstacles_list.end(), obstacle_ptr));
     }
 
 
@@ -53,6 +57,17 @@ namespace labeling
             state.push_back(point_ptr->get_label_offset());
         }
         return state;
+    }
+
+    std::vector<double> simple_optimizer::init_metric(const state_t &state)
+    {
+        std::vector<double> metrics(state.size());
+        point_i zero_offset;
+        for(size_t i = 0; i < state.size(); ++i)
+        {
+            metrics[i] = calc_metric(state, i, zero_offset);
+        }
+        return metrics;
     }
 
     void simple_optimizer::apply_state(const state_t &state)
@@ -77,7 +92,16 @@ namespace labeling
     simple_optimizer::dstate_t simple_optimizer::update_state(const state_t &state)
     {
         size_t idx = rand() % state.size();
-        point_i d_pos = point_i(rand() % 10 - 5, rand() % 10 - 5);
+        const size_i &label_size = points_list[idx]->get_label_size();
+        int w = label_size.w / 10 + 1;
+        int h = label_size.h / 10 + 1;
+        int dx, dy;
+        do
+        {
+            dx = rand() % (2 * w + 1) - w;
+            dy = rand() % (2 * h + 1) - h;
+        } while(!dx && ! dy);
+        point_i d_pos = point_i(dx, dy);
         return dstate_t(idx, d_pos);
     }
 
@@ -91,62 +115,83 @@ namespace labeling
         double d_offset = sqr_points_distance(new_offset, old_positions[i]);
         if (d_offset != 0)
         {
-            summ += 10 * d_offset + 30;
+            summ += 10 * d_offset + 10;
         }
 
         double best_pos_penalty =
-                2 * point_to_points_metric(
+                point_to_points_metric(
                     new_offset, point_ptr1->labels_best_positions());
+        double min_penalty = 0;
+        if(best_pos_penalty != double_limits::max())
+        {
+            best_pos_penalty *= 5;
+            min_penalty = best_pos_penalty;
+        }
         double good_pos_penalty =
-                1 * point_to_points_metric(
+                point_to_points_metric(
                     new_offset, point_ptr1->labels_good_positions());
-        double min_penalty = min(best_pos_penalty, good_pos_penalty);
-        min_penalty = min_penalty == double_limits::max() ? 0 : min_penalty;
+        if(good_pos_penalty != double_limits::max())
+        {
+            good_pos_penalty *= 1;
+            min_penalty = min(best_pos_penalty, good_pos_penalty + 300);
+        }
         if (min_penalty != 0) {
-            summ += min_penalty;
-            summ += 100;
+            summ += min_penalty + 100;
         }
 
         double labels_intersection = 0;
+        rectangle_i new_rect1 =
+            {new_offset + point_ptr1->get_screen_pivot(),
+             point_ptr1->get_label_size()};
         for(size_t j = 0; j < state.size(); ++j)
         {
             if(i == j)
             {
                 continue;
             }
-            rectangle_i new_rect1 =
-                {new_offset + point_ptr1->get_screen_pivot(),
-                 point_ptr1->get_label_size()};
             rectangle_i new_rect2 =
                 {state[j] + points_list[j]->get_screen_pivot(),
                  points_list[j]->get_label_size()};
 
             labels_intersection += rectangle_intersection(new_rect1, new_rect2);
         }
-
         if(labels_intersection != 0)
         {
-            summ += labels_intersection;
-            summ += 300;
+            summ += 4 * labels_intersection + 300;
         }
+
+        double obstacles_intersection = 0;
+        for(screen_obstacle *obstacle_ptr: obstacles_list)
+        {
+            switch (obstacle_ptr->get_type()) {
+            case screen_obstacle::box:
+                obstacles_intersection +=
+                        rectangle_intersection(new_rect1, *(obstacle_ptr->get_box()));
+                break;
+            case screen_obstacle::segment:
+                // TODO
+                break;
+            }
+        }
+        if(obstacles_intersection != 0)
+        {
+            summ += 1 * obstacles_intersection + 70;
+        }
+
         return summ;
     }
 
     void simple_optimizer::best_fit(float time_max)
     {
-        double t = 1;
         auto start = high_resolution_clock::now();
 
         state_t state = init_state();
-        std::vector<double> metrics(state.size());
-        {
-            point_i zero_offset;
-            for(size_t i = 0; i < state.size(); ++i)
-            {
-                metrics[i] = calc_metric(state, i, zero_offset);
-            }
-        }
+        std::vector<double> metrics = init_metric(state);
 
+#ifdef DEBUG
+        double metric_change = 0;
+#endif
+        double t = 1;
         int iterations = 0;
         int64_t current_time;
         do
@@ -156,8 +201,11 @@ namespace labeling
             double d_metric = calc_metric(state, d_state.first, d_state.second) - metrics[d_state.first];
             if(d_metric < 0 || do_jump(t, d_metric))
             {
+#ifdef DEBUG
+                metric_change += d_metric;
+#endif
                 metrics[d_state.first] += d_metric;
-                state[d_state.first] = state[d_state.first] + d_state.second;
+                state[d_state.first] += d_state.second;
             }
             t = get_new_t(iterations);
             iterations += 1;
@@ -166,7 +214,10 @@ namespace labeling
 
 
         apply_state(state);
+#ifdef DEBUG
+        qDebug() << metric_change << " metric_change";
         qDebug() << iterations << " iterations";
+#endif
     }
 
     double simple_optimizer::point_to_points_metric(

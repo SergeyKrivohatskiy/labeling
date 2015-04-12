@@ -29,7 +29,7 @@ namespace labeling
         geom2::size_i label_size;
         geom2::point_i label_offset;
         geom2::points_i_list best_positions;
-        geom2::points_i_list empty_list;
+        geom2::points_i_list good_positions;
     };
 } // namespace labeling
 

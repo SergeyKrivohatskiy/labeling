@@ -17,6 +17,8 @@ namespace geom2
         //point& operator=(const point &other); default
         point operator+(const point &other) const;
         point operator-(const point &other) const;
+        point& operator+=(const point &other);
+        point& operator-=(const point &other);
         double norm() const;
         T sqr_norm() const;
     };
@@ -54,6 +56,22 @@ namespace geom2
         new_point.x = x - other.x;
         new_point.y = y - other.y;
         return new_point;
+    }
+
+    template<class T>
+    point<T>& point<T>::operator+=(const point &other)
+    {
+        x += other.x;
+        y += other.y;
+        return *this;
+    }
+
+    template<class T>
+    point<T>& point<T>::operator-=(const point &other)
+    {
+        x -= other.x;
+        y -= other.y;
+        return *this;
     }
 
     template<class T>
