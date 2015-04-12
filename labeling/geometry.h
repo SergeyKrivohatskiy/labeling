@@ -17,6 +17,7 @@ namespace geom2
         //point& operator=(const point &other); default
         point operator+(const point &other) const;
         point operator-(const point &other) const;
+        point operator/(const T &v) const;
         point& operator+=(const point &other);
         point& operator-=(const point &other);
         double norm() const;
@@ -50,6 +51,15 @@ namespace geom2
     }
 
     template<class T>
+    point<T> point<T>::operator/(const T &v) const
+    {
+        point new_point;
+        new_point.x = x / v;
+        new_point.y = y / v;
+        return new_point;
+    }
+
+    template<class T>
     point<T> point<T>::operator-(const point &other) const
     {
         point new_point;
@@ -77,7 +87,7 @@ namespace geom2
     template<class T>
     double point<T>::norm() const
     {
-        return std::sqrt(sqr_norm());
+        return sqrt(sqr_norm());
     }
 
     template<class T>
@@ -158,6 +168,30 @@ namespace geom2
     T sqr_points_distance(const point<T> &l, const point<T> &r)
     {
         return (r - l).sqr_norm();
+    }
+
+    template<class T>
+    double angle_cos(const point<T> &l, const point<T> &r)
+    {
+        T r_norm = r.norm();
+        T l_norm = l.norm();
+        if(!r_norm || !l_norm)
+        {
+            return 1.0;
+        }
+        return sqrt(l.x * r.x + l.y * r.y) / r_norm / l_norm;
+    }
+
+    template<class T>
+    double sqr_angle_cos(const point<T> &l, const point<T> &r)
+    {
+        T r_norm = r.sqr_norm();
+        T l_norm = l.sqr_norm();
+        if(!r_norm || !l_norm)
+        {
+            return 1.0;
+        }
+        return (l.x * r.x + l.y * r.y) / r_norm / l_norm;
     }
 
 } // namespace geom2
