@@ -111,9 +111,23 @@ void MainWindow::paintEvent(QPaintEvent *)
         QPoint label_left_bottom =
                 to_qt(point->get_screen_pivot() +
                       point->get_label_offset());
+        point_i label_center =
+                point->get_screen_pivot() +
+                point->get_label_offset() +
+                static_cast<point_i>(point->get_label_size()) / 2;
 
-        painter.drawLine(label_left_bottom,
-                         to_qt(point->get_screen_pivot()));
+        point_i intersection_point;
+        if(seg_rect_intersection(segment_i{label_center, point->get_screen_pivot()},
+                                 rectangle_i{point->get_screen_pivot() +
+                                 point->get_label_offset(),
+                                 point->get_label_size()},
+                                 &intersection_point,
+                                 static_cast<point_i *>(nullptr)))
+        {
+            painter.drawLine(to_qt(intersection_point),
+                             to_qt(point->get_screen_pivot()));
+        } // else- line is under the label
+
         painter.setPen(QPen(Qt::blue, 3));
         painter.drawRect(QRect(label_left_bottom,
                                to_qt(point->get_label_size())));

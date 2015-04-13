@@ -16,6 +16,9 @@ namespace geom2
         point(T x, T y);
         point operator+(const point &other) const;
         point operator-(const point &other) const;
+        T operator*(const point &other) const;
+        T dot(const point &other) const;
+        point operator*(const T &v) const;
         point operator/(const T &v) const;
         point& operator+=(const point &other);
         point& operator-=(const point &other);
@@ -41,11 +44,32 @@ namespace geom2
     }
 
     template<class T>
+    T point<T>::operator*(const point<T> &other) const
+    {
+        return x * other.y - y * other.x;
+    }
+
+    template<class T>
+    T point<T>::dot(const point<T> &other) const
+    {
+        return x * other.x + y * other.y;
+    }
+
+    template<class T>
     point<T> point<T>::operator+(const point &other) const
     {
         point new_point;
         new_point.x = x + other.x;
         new_point.y = y + other.y;
+        return new_point;
+    }
+
+    template<class T>
+    point<T> point<T>::operator*(const T &v) const
+    {
+        point new_point;
+        new_point.x = x * v;
+        new_point.y = y * v;
         return new_point;
     }
 
@@ -92,7 +116,7 @@ namespace geom2
     template<class T>
     T point<T>::sqr_norm() const
     {
-        return x * x + y * y;
+        return (*this).dot(*this);
     }
 
     typedef point<int> point_i;
@@ -116,7 +140,14 @@ namespace geom2
     {
         T w;
         T h;
+        operator point<T>() const;
     };
+
+    template<class T>
+    size<T>::operator point<T>() const
+    {
+        return point<T>(w, h);
+    }
 
     typedef size<int> size_i;
     typedef size<float> size_f;
@@ -223,7 +254,93 @@ namespace geom2
                                const segment<T> &sec_seg,
                                point<T> *intersection_point)
     {
-        // TODO
+        const point<T> &p = fst_seg.start;
+        const point<T> &q = sec_seg.start;
+        point<T> r = fst_seg.end - p;
+        point<T> s = sec_seg.end - q;
+
+        point<T> q_p = q - p;
+        double rxs = r * s;
+        double q_pxs = q_p * s;
+        double q_pxr = q_p * r;
+
+        if(rxs == 0)
+        {
+            if(q_pxr != 0)
+            {
+                // two segments are parallel and non-intersecting
+                return false;
+            }
+            // TODO check for disjoint and overlapp
+            return false;
+        }
+
+        double t = q_pxs / rxs;
+        double u = q_pxr / rxs;
+        // TODO maybe add epsilon for value_in_range checking?
+        if(!value_in_range(t, 0.0, 1.0) || !value_in_range(u, 0.0, 1.0))
+        {
+            // the two segments are not parallel and do not intersect
+            return false;
+        }
+        if(intersection_point != nullptr)
+        {
+            *intersection_point = p +
+                    point<T>(static_cast<T>(r.x * t),
+                             static_cast<T>(r.y * t));
+        }
+        return true;
+    }
+
+    /*
+     * Checks segment-rectangle intersection
+     *
+     * @param intersection_point1 is unnecessary output parameter
+     * Contains the first intersection point if there is one and
+     * intersection_point1 is not NULL
+     * @param intersection_point2 is unnecessary output parameter
+     * Contains the second intersection point if there is one and
+     * intersection_point2 is not NULL
+     * @return number of intersection points found(from 0 to 2)
+     */
+    template<class T>
+    int seg_rect_intersection(const segment<T> &seg,
+                               const rectangle<T> &rect,
+                              point<T> *intersection_point1,
+                              point<T> *intersection_point2)
+    {
+        segment<T> rect_seg[4] = {
+            {rect.left_bottom,
+             rect.left_bottom + point<T>(rect.size.w, 0)},
+            {rect.left_bottom + point<T>(rect.size.h, 0),
+             rect.left_bottom + rect.size},
+            {rect.left_bottom + rect.size,
+             rect.left_bottom + point<T>(0, rect.size.h)},
+            {rect.left_bottom + point<T>(0, rect.size.h),
+             rect.left_bottom}};
+        int intersections = 0;
+        point<T> intersection_point;
+        for(int i = 0; i < 4; ++i)
+        {
+            if(segments_intersection(seg, rect_seg[i], &intersection_point))
+            {
+                intersections += 1;
+                if(intersections == 2)
+                {
+                    if(intersection_point2 != nullptr)
+                    {
+                        *intersection_point2 = intersection_point;
+                    }
+                    return intersections;
+                }
+                if(intersection_point1 != nullptr)
+                {
+                    *intersection_point1 = intersection_point;
+                }
+            }
+        }
+
+        return intersections;
     }
 
 } // namespace geom2
