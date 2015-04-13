@@ -16,9 +16,9 @@ SOURCES += main.cpp\
         mainwindow.cpp \
     base_screen_obstacle.cpp \
     test_point_feature.cpp \
-    simple_optimizer.cpp \
     screen_point_feature.cpp \
-    geom2_to_qt.cpp
+    geom2_to_qt.cpp \
+    sim_annealing_opt.cpp
 
 HEADERS  += mainwindow.h \
     geometry.h \
@@ -27,7 +27,7 @@ HEADERS  += mainwindow.h \
     positions_optimizer.h \
     base_screen_obstacle.h \
     test_point_feature.h \
-    simple_optimizer.h \
-    geom2_to_qt.h
+    geom2_to_qt.h \
+    sim_annealing_opt.h
 
 FORMS    += mainwindow.ui

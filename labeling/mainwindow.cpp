@@ -6,7 +6,7 @@
 #include "base_screen_obstacle.h"
 #include "screen_obstacle.h"
 #include "test_point_feature.h"
-#include "simple_optimizer.h"
+#include "sim_annealing_opt.h"
 #include "geom2_to_qt.h"
 
 using namespace geom2;
@@ -22,7 +22,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow),
     timer(new QTimer()),
     time_to_optimize(5),
-    pos_optimizer(new labeling::simple_optimizer())
+    pos_optimizer(new labeling::sim_annealing_opt())
 {
     ui->setupUi(this);
 

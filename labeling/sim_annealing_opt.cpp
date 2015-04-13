@@ -1,4 +1,4 @@
-#include "simple_optimizer.h"
+#include "sim_annealing_opt.h"
 #include <chrono>
 #include <math.h>
 #include <random>
@@ -19,29 +19,29 @@ typedef std::numeric_limits<double> double_limits;
 namespace labeling
 {
 
-    simple_optimizer::simple_optimizer()
+    sim_annealing_opt::sim_annealing_opt()
     {}
 
-    simple_optimizer::~simple_optimizer()
+    sim_annealing_opt::~sim_annealing_opt()
     {}
 
-    void simple_optimizer::register_label(screen_point_feature *point_ptr)
+    void sim_annealing_opt::register_label(screen_point_feature *point_ptr)
     {
         points_list.push_back(point_ptr);
         old_positions.push_back(point_ptr->get_label_offset());
     }
 
-    void simple_optimizer::unregister_label(screen_point_feature *)
+    void sim_annealing_opt::unregister_label(screen_point_feature *)
     {
         // TODO
     }
 
-    void simple_optimizer::register_obstacle(screen_obstacle *obstacle_ptr)
+    void sim_annealing_opt::register_obstacle(screen_obstacle *obstacle_ptr)
     {
         obstacles_list.push_back(obstacle_ptr);
     }
 
-    void simple_optimizer::unregister_obstacle(screen_obstacle *obstacle_ptr)
+    void sim_annealing_opt::unregister_obstacle(screen_obstacle *obstacle_ptr)
     {
         obstacles_list.erase(std::find(obstacles_list.begin(),
                                        obstacles_list.end(),
@@ -49,7 +49,7 @@ namespace labeling
     }
 
 
-    simple_optimizer::state_t simple_optimizer::init_state() const
+    sim_annealing_opt::state_t sim_annealing_opt::init_state() const
     {
         state_t state;
         state.reserve(points_list.size());
@@ -60,7 +60,7 @@ namespace labeling
         return state;
     }
 
-    std::vector<double> simple_optimizer::init_metric(const state_t &state)
+    std::vector<double> sim_annealing_opt::init_metric(const state_t &state)
     {
         std::vector<double> metrics(state.size());
         point_i zero_offset;
@@ -71,7 +71,7 @@ namespace labeling
         return metrics;
     }
 
-    void simple_optimizer::apply_state(const state_t &state)
+    void sim_annealing_opt::apply_state(const state_t &state)
     {
         for(size_t i = 0; i < state.size(); ++i)
         {
@@ -80,17 +80,17 @@ namespace labeling
         old_positions = state;
     }
 
-    double simple_optimizer::get_new_t(int iterations)
+    double sim_annealing_opt::get_new_t(int iterations)
     {
         return 1.0 / iterations / iterations;
     }
 
-    bool simple_optimizer::do_jump(double t, double d_metrics)
+    bool sim_annealing_opt::do_jump(double t, double d_metrics)
     {
         return rand() < (RAND_MAX * exp(-d_metrics / t));
     }
 
-    simple_optimizer::dstate_t simple_optimizer::update_state(
+    sim_annealing_opt::dstate_t sim_annealing_opt::update_state(
             const state_t &state)
     {
         size_t idx = rand() % state.size();
@@ -107,7 +107,7 @@ namespace labeling
         return dstate_t(idx, d_pos);
     }
 
-    double simple_optimizer::calc_metric(const state_t &state,
+    double sim_annealing_opt::calc_metric(const state_t &state,
                                          size_t i,
                                          const point_i &offset_change) const
     {
@@ -188,7 +188,7 @@ namespace labeling
         return summ;
     }
 
-    void simple_optimizer::best_fit(float time_max)
+    void sim_annealing_opt::best_fit(float time_max)
     {
         auto start = high_resolution_clock::now();
 
@@ -234,7 +234,7 @@ namespace labeling
 #endif
     }
 
-    double simple_optimizer::point_to_points_metric(
+    double sim_annealing_opt::point_to_points_metric(
             const point_i &point, const points_i_list &points)
     {
         double min_distance = double_limits::max();

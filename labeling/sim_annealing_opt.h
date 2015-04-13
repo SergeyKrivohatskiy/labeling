@@ -1,16 +1,16 @@
-#ifndef SIMPLE_OPTIMIZER_H
-#define SIMPLE_OPTIMIZER_H
+#ifndef SIM_ANNEALING_OPT_H
+#define SIM_ANNEALING_OPT_H
 
 #include "positions_optimizer.h"
 #include <set>
 
 namespace labeling
 {
-    class simple_optimizer : public positions_optimizer
+    class sim_annealing_opt : public positions_optimizer
     {
     public:
-        simple_optimizer();
-        ~simple_optimizer();
+        sim_annealing_opt();
+        ~sim_annealing_opt();
         void register_label(screen_point_feature *);
         void unregister_label(screen_point_feature *);
 
@@ -33,7 +33,7 @@ namespace labeling
         void apply_state(const state_t &state);
         dstate_t update_state(const state_t &state);
         state_t init_state() const;
-        std::vector<double> simple_optimizer::init_metric(
+        std::vector<double> sim_annealing_opt::init_metric(
                 const state_t &state);
     private:
         static bool do_jump(double t, double d_metrics);
@@ -45,4 +45,4 @@ namespace labeling
                                              const geom2::points_i_list &points);
     };
 } // namespace labeling
-#endif // SIMPLE_OPTIMIZER_H
+#endif // SIM_ANNEALING_OPT_H
