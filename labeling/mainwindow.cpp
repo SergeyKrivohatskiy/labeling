@@ -13,6 +13,8 @@ using namespace geom2;
 using labeling::screen_obstacle;
 using labeling::screen_point_feature;
 using labeling::base_screen_obstacle;
+using labeling::test_point_feature;
+using std::unique_ptr;
 
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -31,7 +33,9 @@ MainWindow::MainWindow(QWidget *parent) :
     timer->start(UPDATE_TIME_MS);
 }
 
-void MainWindow::fill_screen(int points_count, int obstacles_count, int max_speed)
+void MainWindow::fill_screen(int points_count,
+                             int obstacles_count,
+                             int max_speed)
 {
     size_i field_size{800, 600};
     for(int i = 0; i < points_count; ++i)
@@ -39,8 +43,9 @@ void MainWindow::fill_screen(int points_count, int obstacles_count, int max_spee
         point_i pos(rand() % field_size.w, rand() % field_size.h);
         point_i speed(rand() % (2 * max_speed + 1) - max_speed,
                       rand() % (2 * max_speed + 1) - max_speed);
-        auto new_point = new labeling::test_point_feature(pos, speed, field_size);
-        screen_points.push_back(std::unique_ptr<screen_point_feature>(new_point));
+        auto new_point = new test_point_feature(pos, speed, field_size);
+        screen_points.push_back(
+                    unique_ptr<screen_point_feature>(new_point));
         pos_optimizer->register_label(new_point);
     }
 
@@ -48,17 +53,19 @@ void MainWindow::fill_screen(int points_count, int obstacles_count, int max_spee
     {
         point_i pos(rand() % field_size.w, rand() % field_size.h);
         size_i size{rand() % 150 + 50, rand() % 20 + 20};
-        screen_obstacle *new_obstacle = new base_screen_obstacle(rectangle_i{pos, size});
-        screen_obstacles.push_back(std::unique_ptr<screen_obstacle>(new_obstacle));
+        screen_obstacle *new_obstacle =
+                new base_screen_obstacle(rectangle_i{pos, size});
+        screen_obstacles.push_back(
+                    unique_ptr<screen_obstacle>(new_obstacle));
         pos_optimizer->register_obstacle(new_obstacle);
     }
 }
 
 void MainWindow::update()
 {
-    for(auto it = screen_points.begin(); it != screen_points.end(); ++it)
+    for(auto &point_u_ptr: screen_points)
     {
-        static_cast<labeling::test_point_feature&>(**it).update_position();
+        static_cast<test_point_feature&>(*point_u_ptr).update_position();
     }
 
     QElapsedTimer ellapsed_timer;
@@ -83,9 +90,9 @@ void MainWindow::paintEvent(QPaintEvent *)
 {
     QPainter painter(this);
 
-    for(auto it = screen_obstacles.begin(); it != screen_obstacles.end(); ++it)
+    for(auto &obstacle_u_ptr: screen_obstacles)
     {
-        screen_obstacle *obstacle = (*it).get();
+        screen_obstacle *obstacle = obstacle_u_ptr.get();
         if(obstacle->get_type() == screen_obstacle::segment)
         {
             painter.setPen(QPen(Qt::yellow, 4));
@@ -95,18 +102,21 @@ void MainWindow::paintEvent(QPaintEvent *)
         }
     }
 
-    for(auto it = screen_points.begin(); it != screen_points.end(); ++it)
+    for(auto &point_u_ptr: screen_points)
     {
-        screen_point_feature *point = (*it).get();
+        screen_point_feature *point = point_u_ptr.get();
         painter.setPen(QPen(Qt::blue, 10));
         painter.drawPoint(to_qt(point->get_screen_pivot()));
         painter.setPen(QPen(Qt::blue, 1));
         QPoint label_left_bottom =
-                to_qt(point->get_screen_pivot() + point->get_label_offset());
+                to_qt(point->get_screen_pivot() +
+                      point->get_label_offset());
+
         painter.drawLine(label_left_bottom,
                          to_qt(point->get_screen_pivot()));
         painter.setPen(QPen(Qt::blue, 3));
-        painter.drawRect(QRect(label_left_bottom, to_qt(point->get_label_size())));
+        painter.drawRect(QRect(label_left_bottom,
+                               to_qt(point->get_label_size())));
     }
 }
 

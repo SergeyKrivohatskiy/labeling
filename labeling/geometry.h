@@ -9,12 +9,11 @@ namespace geom2
     template<class T>
     struct point
     {
-        point();
-        //point(const point &); default
-        point(T x, T y);
         T x;
         T y;
-        //point& operator=(const point &other); default
+
+        point();
+        point(T x, T y);
         point operator+(const point &other) const;
         point operator-(const point &other) const;
         point operator/(const T &v) const;
@@ -142,14 +141,19 @@ namespace geom2
         return value >= l && value <= r;
     }
 
-    // Rectangle sizes should be >= 0
+    /*
+     * Calculates area of rectangles intersection
+     * Rectangle sizes should be not negative(>= 0)
+    */
     template<class T>
     T rectangle_intersection(const rectangle<T> &l, const rectangle<T> &r)
     {
         const T &x_top = std::max(l.left_bottom.x, r.left_bottom.x);
         const T &y_top = std::max(l.left_bottom.y, r.left_bottom.y);
-        const T &x_bot = std::min(l.left_bottom.x + l.size.w, r.left_bottom.x + r.size.w);
-        const T &y_bot = std::min(l.left_bottom.y + l.size.h, r.left_bottom.y + r.size.h);
+        const T &x_bot = std::min(l.left_bottom.x + l.size.w,
+                                  r.left_bottom.x + r.size.w);
+        const T &y_bot = std::min(l.left_bottom.y + l.size.h,
+                                  r.left_bottom.y + r.size.h);
         if(x_top >= x_bot || y_top >= y_bot)
         {
             return T();
@@ -158,18 +162,27 @@ namespace geom2
         return (x_top - x_bot) * (y_top - y_bot);
     }
 
+    /*
+     * Calculates ||l - r||
+    */
     template<class T>
     double points_distance(const point<T> &l, const point<T> &r)
     {
         return (r - l).norm();
     }
 
+    /*
+     * Calculates ||l - r||^2
+    */
     template<class T>
     T sqr_points_distance(const point<T> &l, const point<T> &r)
     {
         return (r - l).sqr_norm();
     }
 
+    /*
+     * Calculates cos of min angle betveen two radius(position) vectors
+    */
     template<class T>
     double angle_cos(const point<T> &l, const point<T> &r)
     {
@@ -182,6 +195,9 @@ namespace geom2
         return sqrt(l.x * r.x + l.y * r.y) / r_norm / l_norm;
     }
 
+    /*
+     * Calculates cos^2 of min angle betveen two radius(position) vectors
+    */
     template<class T>
     double sqr_angle_cos(const point<T> &l, const point<T> &r)
     {
@@ -192,6 +208,22 @@ namespace geom2
             return 1.0;
         }
         return (l.x * r.x + l.y * r.y) / r_norm / l_norm;
+    }
+
+    /*
+     * Checks two segments for intersection
+     *
+     * @param intersection_point is unnecessary output parameter
+     * Contains the intersection point if there is one and
+     * intersection_point is not NULL
+     * @return true if fst_seg intersects sec_seg
+    */
+    template<class T>
+    bool segments_intersection(const segment<T> &fst_seg,
+                               const segment<T> &sec_seg,
+                               point<T> *intersection_point)
+    {
+        // TODO
     }
 
 } // namespace geom2

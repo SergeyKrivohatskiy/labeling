@@ -28,11 +28,13 @@ namespace labeling
         obstacles_list_t obstacles_list;
         state_t old_positions;
     private:
+        double calc_metric(const state_t &state, size_t i,
+                           const geom2::point_i &new_offset) const;
+        void apply_state(const state_t &state);
         dstate_t update_state(const state_t &state);
         state_t init_state() const;
-        double calc_metric(const state_t &state, size_t i, const geom2::point_i &new_offset) const;
-        void apply_state(const state_t &state);
-        std::vector<double> simple_optimizer::init_metric(const state_t &state);
+        std::vector<double> simple_optimizer::init_metric(
+                const state_t &state);
     private:
         static bool do_jump(double t, double d_metrics);
         static double get_new_t(int iterations);

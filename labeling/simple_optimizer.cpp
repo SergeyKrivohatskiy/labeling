@@ -43,8 +43,9 @@ namespace labeling
 
     void simple_optimizer::unregister_obstacle(screen_obstacle *obstacle_ptr)
     {
-        obstacles_list.erase(
-                    std::find(obstacles_list.begin(), obstacles_list.end(), obstacle_ptr));
+        obstacles_list.erase(std::find(obstacles_list.begin(),
+                                       obstacles_list.end(),
+                                       obstacle_ptr));
     }
 
 
@@ -89,7 +90,8 @@ namespace labeling
         return rand() < (RAND_MAX * exp(-d_metrics / t));
     }
 
-    simple_optimizer::dstate_t simple_optimizer::update_state(const state_t &state)
+    simple_optimizer::dstate_t simple_optimizer::update_state(
+            const state_t &state)
     {
         size_t idx = rand() % state.size();
         const size_i &label_size = points_list[idx]->get_label_size();
@@ -105,14 +107,17 @@ namespace labeling
         return dstate_t(idx, d_pos);
     }
 
-    double simple_optimizer::calc_metric(const state_t &state, size_t i, const point_i &offset_change) const
+    double simple_optimizer::calc_metric(const state_t &state,
+                                         size_t i,
+                                         const point_i &offset_change) const
     {
         double summ = 0;
 
         const screen_point_feature *point_ptr1 = points_list[i];
         point_i new_offset = state[i] + offset_change;
 
-        double d_offset = sqr_points_distance(new_offset, old_positions[i]);
+        double d_offset =
+                sqr_points_distance(new_offset, old_positions[i]);
         if (d_offset != 0)
         {
             summ += 10 * d_offset;
@@ -153,7 +158,8 @@ namespace labeling
                 {state[j] + points_list[j]->get_screen_pivot(),
                  points_list[j]->get_label_size()};
 
-            labels_intersection += rectangle_intersection(new_rect1, new_rect2);
+            labels_intersection +=
+                    rectangle_intersection(new_rect1, new_rect2);
         }
         if(labels_intersection != 0)
         {
@@ -166,7 +172,8 @@ namespace labeling
             switch (obstacle_ptr->get_type()) {
             case screen_obstacle::box:
                 obstacles_intersection +=
-                        rectangle_intersection(new_rect1, *(obstacle_ptr->get_box()));
+                        rectangle_intersection(new_rect1,
+                                               *(obstacle_ptr->get_box()));
                 break;
             case screen_obstacle::segment:
                 // TODO
@@ -193,13 +200,15 @@ namespace labeling
 #endif
         double t = 1;
         int iterations = 0;
-        int max_iterations = 100 * points_list.size();
+        int max_iterations = 100 * static_cast<int>(points_list.size());
         int64_t current_time;
         do
         {
             dstate_t d_state = update_state(state);
 
-            double d_metric = calc_metric(state, d_state.first, d_state.second) - metrics[d_state.first];
+            double d_metric =
+                    calc_metric(state, d_state.first, d_state.second) -
+                    metrics[d_state.first];
             if(d_metric < 0 || do_jump(t, d_metric))
             {
 #ifdef DEBUG
@@ -210,8 +219,12 @@ namespace labeling
             }
             t = get_new_t(iterations);
             iterations += 1;
-            current_time = (duration_cast<milliseconds>(high_resolution_clock::now() - start)).count();
-        } while(t > 0 && current_time < time_max && iterations < max_iterations);
+            current_time =
+                    (duration_cast<milliseconds>(
+                         high_resolution_clock::now() - start)).count();
+        } while(t > 0 &&
+                current_time < time_max &&
+                iterations < max_iterations);
 
 
         apply_state(state);

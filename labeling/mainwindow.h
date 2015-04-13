@@ -24,13 +24,17 @@ public:
 protected:
     void paintEvent(QPaintEvent *);
 private:
-    void fill_screen(int points_count, int obstacles_count, int max_speed);
+    void fill_screen(int points_count,
+                     int obstacles_count,
+                     int max_speed);
 private slots:
     void update();
 
 private:
-    typedef std::vector<std::unique_ptr<labeling::screen_obstacle>> screen_obstacles_t;
-    typedef std::vector<std::unique_ptr<labeling::screen_point_feature>> screen_points_t;
+    typedef std::vector<std::unique_ptr<labeling::screen_obstacle>>
+        screen_obstacles_t;
+    typedef std::vector<std::unique_ptr<labeling::screen_point_feature>>
+        screen_points_t;
 private:
     std::unique_ptr<Ui::MainWindow> ui;
     std::unique_ptr<QTimer> timer;

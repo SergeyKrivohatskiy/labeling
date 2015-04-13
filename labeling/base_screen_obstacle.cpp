@@ -2,8 +2,9 @@
 
 namespace labeling
 {
+    using namespace geom2;
 
-    base_screen_obstacle::base_screen_obstacle(const geom2::rectangle_i &box)
+    base_screen_obstacle::base_screen_obstacle(const rectangle_i &box)
         :
           box(box),
           t(type::box)
@@ -11,7 +12,7 @@ namespace labeling
 
     }
 
-    base_screen_obstacle::base_screen_obstacle(const geom2::segment_i &segment)
+    base_screen_obstacle::base_screen_obstacle(const segment_i &segment)
         :
           segment(segment),
           t(type::segment)
@@ -24,11 +25,11 @@ namespace labeling
         return t;
     }
 
-    const geom2::rectangle_i* base_screen_obstacle::get_box() const
+    const rectangle_i* base_screen_obstacle::get_box() const
     {
         return &box;
     }
-    const geom2::segment_i* base_screen_obstacle::get_segment() const
+    const segment_i* base_screen_obstacle::get_segment() const
     {
         return &segment;
     }

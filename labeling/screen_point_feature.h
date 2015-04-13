@@ -21,7 +21,5 @@ namespace labeling
         virtual const geom2::points_i_list& labels_best_positions() const = 0;
         virtual const geom2::points_i_list& labels_good_positions() const = 0;
     };
-
-    int labels_intersection(const screen_point_feature &l, const screen_point_feature &r);
 } // namespace labeling
 #endif // SCREEN_POINT_FEATURE_H
