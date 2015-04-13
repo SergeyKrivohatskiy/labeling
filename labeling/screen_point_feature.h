@@ -5,15 +5,25 @@
 namespace labeling
 {
 
+    /*
+     * Screen point interface
+     *
+     * You should implement this interface for your screen objects
+     * if you want to use positions_optimizer to optimize labels
+     * positioning
+     *
+     * @see positions_optimizer
+     */
     class screen_point_feature
     {
     public:
         virtual ~screen_point_feature() {}
 
+        /*
+         * @return absolute position of this screen point
+         */
         virtual const geom2::point_i& get_screen_pivot() const = 0;
         virtual const geom2::size_i& get_label_size() const = 0;
-
-        virtual const geom2::rectangle_i get_label_rect() const;
 
         virtual const geom2::point_i& get_label_offset() const = 0;
         virtual void set_label_offset(geom2::point_i const &) = 0;

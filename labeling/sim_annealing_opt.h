@@ -6,6 +6,10 @@
 
 namespace labeling
 {
+    /*
+     * Positions optimizer that uses simulated annealing to optimize
+     * labels positions
+     */
     class sim_annealing_opt : public positions_optimizer
     {
     public:
@@ -39,8 +43,10 @@ namespace labeling
         static bool do_jump(double t, double d_metrics);
         static double get_new_t(int iterations);
 
-        // returns closest distance between point and points
-        // or double max value if points.size() == 0
+        /*
+         * @return closest distance between point and
+         * points or double max value if points.size() == 0
+         */
         static double point_to_points_metric(const geom2::point_i &point,
                                              const geom2::points_i_list &points);
     };

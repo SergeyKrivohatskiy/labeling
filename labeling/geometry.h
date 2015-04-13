@@ -144,7 +144,7 @@ namespace geom2
     /*
      * Calculates area of rectangles intersection
      * Rectangle sizes should be not negative(>= 0)
-    */
+     */
     template<class T>
     T rectangle_intersection(const rectangle<T> &l, const rectangle<T> &r)
     {
@@ -164,7 +164,7 @@ namespace geom2
 
     /*
      * Calculates ||l - r||
-    */
+     */
     template<class T>
     double points_distance(const point<T> &l, const point<T> &r)
     {
@@ -173,7 +173,7 @@ namespace geom2
 
     /*
      * Calculates ||l - r||^2
-    */
+     */
     template<class T>
     T sqr_points_distance(const point<T> &l, const point<T> &r)
     {
@@ -182,7 +182,7 @@ namespace geom2
 
     /*
      * Calculates cos of min angle betveen two radius(position) vectors
-    */
+     */
     template<class T>
     double angle_cos(const point<T> &l, const point<T> &r)
     {
@@ -197,7 +197,7 @@ namespace geom2
 
     /*
      * Calculates cos^2 of min angle betveen two radius(position) vectors
-    */
+     */
     template<class T>
     double sqr_angle_cos(const point<T> &l, const point<T> &r)
     {
@@ -217,7 +217,7 @@ namespace geom2
      * Contains the intersection point if there is one and
      * intersection_point is not NULL
      * @return true if fst_seg intersects sec_seg
-    */
+     */
     template<class T>
     bool segments_intersection(const segment<T> &fst_seg,
                                const segment<T> &sec_seg,

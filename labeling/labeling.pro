@@ -16,7 +16,6 @@ SOURCES += main.cpp\
         mainwindow.cpp \
     base_screen_obstacle.cpp \
     test_point_feature.cpp \
-    screen_point_feature.cpp \
     geom2_to_qt.cpp \
     sim_annealing_opt.cpp
 

@@ -4,6 +4,11 @@
 
 namespace labeling
 {
+    /*
+     * Obstacle interface. Obstacle might be a box or a segment
+     *
+     * @see positions_optimizer
+     */
     class screen_obstacle
     {
     public:
