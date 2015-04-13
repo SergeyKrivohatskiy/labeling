@@ -212,7 +212,9 @@ namespace labeling
                                                *(obstacle_ptr->get_box()));
                 break;
             case screen_obstacle::segment:
-                // TODO
+                obstacles_intersection +=
+                        get_sqr_seg_rect_intersection(*(obstacle_ptr->get_segment()),
+                                                      new_rect1);
                 break;
             }
         }

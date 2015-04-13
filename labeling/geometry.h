@@ -172,6 +172,14 @@ namespace geom2
         return value >= l && value <= r;
     }
 
+    template<class T>
+    bool point_in_rect(const point<T> &p, const rectangle<T> &r)
+    {
+        return p.x >= r.left_bottom.x && p.y >= r.left_bottom.y &&
+                p.x <= r.left_bottom.x + r.size.w &&
+                p.y <= r.left_bottom.y + r.size.h;
+    }
+
     /*
      * Calculates area of rectangles intersection
      * Rectangle sizes should be not negative(>= 0)
@@ -271,7 +279,7 @@ namespace geom2
                 // two segments are parallel and non-intersecting
                 return false;
             }
-            // TODO check for disjoint and overlapp
+            // TODO check for disjoint and overlapp?
             return false;
         }
 
@@ -341,6 +349,34 @@ namespace geom2
         }
 
         return intersections;
+    }
+
+    template<class T>
+    T get_sqr_seg_rect_intersection(const segment<T> &seg,
+                                    const rectangle<T> &rect)
+    {
+        point<T> intersection_point1;
+        point<T> intersection_point2;
+        int intersections =
+                seg_rect_intersection(seg, rect,
+                                      &intersection_point1,
+                                      &intersection_point2);
+        if(intersections == 0)
+        {
+            return T();
+        }
+
+        if(intersections == 1)
+        {
+            // one point inside rect
+            if(point_in_rect(seg.start, rect))
+            {
+                return sqr_points_distance(seg.start, intersection_point1);
+            } else {
+                return sqr_points_distance(seg.end, intersection_point1);
+            }
+        }
+        return sqr_points_distance(intersection_point1, intersection_point2);
     }
 
 } // namespace geom2
