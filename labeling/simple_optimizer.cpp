@@ -115,7 +115,7 @@ namespace labeling
         double d_offset = sqr_points_distance(new_offset, old_positions[i]);
         if (d_offset != 0)
         {
-            summ += 10 * d_offset + 10;
+            summ += 10 * d_offset;
         }
 
         double best_pos_penalty =
@@ -193,6 +193,7 @@ namespace labeling
 #endif
         double t = 1;
         int iterations = 0;
+        int max_iterations = 100 * points_list.size();
         int64_t current_time;
         do
         {
@@ -210,7 +211,7 @@ namespace labeling
             t = get_new_t(iterations);
             iterations += 1;
             current_time = (duration_cast<milliseconds>(high_resolution_clock::now() - start)).count();
-        } while(t > 0 && current_time < time_max);
+        } while(t > 0 && current_time < time_max && iterations < max_iterations);
 
 
         apply_state(state);

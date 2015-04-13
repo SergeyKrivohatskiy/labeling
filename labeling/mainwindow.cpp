@@ -19,12 +19,12 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
     timer(new QTimer()),
-    time_to_optimize(10),
+    time_to_optimize(5),
     pos_optimizer(new labeling::simple_optimizer())
 {
     ui->setupUi(this);
 
-    fill_screen(20, 5, 1);
+    fill_screen(30, 5, 1);
 
     connect(timer.get(), SIGNAL(timeout()), this, SLOT(update()));
     update();

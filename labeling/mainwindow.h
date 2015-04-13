@@ -7,7 +7,7 @@
 #include <vector>
 #include "positions_optimizer.h"
 
-const int UPDATE_TIME_MS = 40;
+const int UPDATE_TIME_MS = 200;
 
 namespace Ui {
 class MainWindow;
