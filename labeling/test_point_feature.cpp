@@ -11,12 +11,13 @@ namespace labeling
           speed(speed),
           field_size(field_size)
     {
-        label_size.h = 40;
+        label_size.h = 30;
         label_size.w = 100;
-        label_offset.x = label_offset.y = 40;
+        label_offset.x = label_offset.y = 4;
         best_positions.push_back(label_offset);
-        best_positions.push_back(point_i{-40, 40});
-        good_positions.push_back(point_i{40, -40});
+        best_positions.push_back(point_i{-104, -34});
+        best_positions.push_back(point_i{-104, 4});
+        best_positions.push_back(point_i{4, -34});
     }
 
     test_point_feature::~test_point_feature()

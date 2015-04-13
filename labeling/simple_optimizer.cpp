@@ -91,18 +91,33 @@ namespace labeling
 
     simple_optimizer::dstate_t simple_optimizer::update_state(const state_t &state)
     {
+//        size_t idx = rand() % state.size();
+//        const size_i &label_size = points_list[idx]->get_label_size();
+//        int w = label_size.w / 10 + 1;
+//        int h = label_size.h / 10 + 1;
+//        int dx, dy;
+//        do
+//        {
+//            dx = rand() % (2 * w + 1) - w;
+//            dy = rand() % (2 * h + 1) - h;
+//        } while(!dx && ! dy);
+//        point_i d_pos = point_i(dx, dy);
+//        return dstate_t(idx, d_pos);
         size_t idx = rand() % state.size();
-        const size_i &label_size = points_list[idx]->get_label_size();
-        int w = label_size.w / 10 + 1;
-        int h = label_size.h / 10 + 1;
-        int dx, dy;
-        do
+        auto &best_pos = points_list[idx]->labels_best_positions();
+        auto &good_pos = points_list[idx]->labels_good_positions();
+        size_t pos_idx = rand() % + (best_pos.size() + good_pos.size());
+        if(pos_idx < best_pos.size())
         {
-            dx = rand() % (2 * w + 1) - w;
-            dy = rand() % (2 * h + 1) - h;
-        } while(!dx && ! dy);
-        point_i d_pos = point_i(dx, dy);
-        return dstate_t(idx, d_pos);
+            return dstate_t(idx, best_pos[pos_idx] - state[idx]);
+        }
+        pos_idx -= best_pos.size();
+        if(pos_idx < good_pos.size())
+        {
+                return dstate_t(idx, good_pos[pos_idx] - state[idx]);
+
+        }
+        return dstate_t(idx, point_i());
     }
 
     double simple_optimizer::calc_metric(const state_t &state, size_t i, const point_i &offset_change) const
@@ -115,7 +130,7 @@ namespace labeling
         double d_offset = sqr_points_distance(new_offset, old_positions[i]);
         if (d_offset != 0)
         {
-            summ += 10 * d_offset + 10;
+            summ += 100;
         }
 
         double best_pos_penalty =
@@ -157,7 +172,7 @@ namespace labeling
         }
         if(labels_intersection != 0)
         {
-            summ += 4 * labels_intersection + 300;
+            summ += 6 * labels_intersection + 3000;
         }
 
         double obstacles_intersection = 0;

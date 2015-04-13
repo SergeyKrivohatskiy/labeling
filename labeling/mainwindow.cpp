@@ -19,12 +19,12 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
     timer(new QTimer()),
-    time_to_optimize(10),
+    time_to_optimize(3),
     pos_optimizer(new labeling::simple_optimizer())
 {
     ui->setupUi(this);
 
-    fill_screen(20, 5, 1);
+    fill_screen(20, 4, 1);
 
     connect(timer.get(), SIGNAL(timeout()), this, SLOT(update()));
     update();
@@ -107,6 +107,16 @@ void MainWindow::paintEvent(QPaintEvent *)
                          to_qt(point->get_screen_pivot()));
         painter.setPen(QPen(Qt::blue, 3));
         painter.drawRect(QRect(label_left_bottom, to_qt(point->get_label_size())));
+        painter.setPen(QPen(Qt::red, 2));
+        for(auto &best_point: point->labels_best_positions())
+        {
+            painter.drawPoint(to_qt(point->get_screen_pivot() + best_point));
+        }
+        painter.setPen(QPen(Qt::red, 1));
+        for(auto good_point: point->labels_good_positions())
+        {
+            painter.drawPoint(to_qt(point->get_screen_pivot() + good_point));
+        }
     }
 }
 
