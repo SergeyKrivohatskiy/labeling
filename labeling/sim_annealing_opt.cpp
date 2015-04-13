@@ -213,8 +213,9 @@ namespace labeling
                 break;
             case screen_obstacle::segment:
                 obstacles_intersection +=
-                        get_sqr_seg_rect_intersection(*(obstacle_ptr->get_segment()),
-                                                      new_rect1);
+                        get_sqr_seg_rect_intersection(
+                            *(obstacle_ptr->get_segment()),
+                            new_rect1);
                 break;
             }
         }

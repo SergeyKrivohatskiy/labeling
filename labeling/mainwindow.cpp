@@ -117,7 +117,8 @@ void MainWindow::paintEvent(QPaintEvent *)
                 static_cast<point_i>(point->get_label_size()) / 2;
 
         point_i intersection_point;
-        if(seg_rect_intersection(segment_i{label_center, point->get_screen_pivot()},
+        if(seg_rect_intersection(segment_i{label_center,
+                                 point->get_screen_pivot()},
                                  rectangle_i{point->get_screen_pivot() +
                                  point->get_label_offset(),
                                  point->get_label_size()},
