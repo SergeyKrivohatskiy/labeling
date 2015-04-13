@@ -18,7 +18,35 @@ typedef std::numeric_limits<double> double_limits;
 
 namespace labeling
 {
+    /*
+     * Correct values from 1 to MAX_INT
+     * The bigger the less steps will be generated each iteration
+     */
+    const int STATE_CHANGE_FACTOR = 10;
+    /*
+     * Correct values from 1 to MAX_INT/max_points_count(to avoid an overflow)
+     * The bigger the less steps will be generated each iteration
+     */
+    const int MAX_ITERATIONS_FACTOR = 100;
+    /*
+     * Correct values from 0 to +inf
+     * Affect penalty for moving labels
+     */
+    const double OFFSET_FACTOR = 10;
+    /*
+     * Correct values from 0 to +inf
+     * Affect penalty for label-label intersections
+     */
+    const double LABELS_INTERSECTION_PENALTY = 4;
+    /*
+     * Correct values from 0 to +inf
+     * Affect penalty for label-obstacle intersection
+     */
+    const double OBSTACLES_INTERSECTION_PENALTY = 1;
+} // namespace labeling
 
+namespace labeling
+{
     sim_annealing_opt::sim_annealing_opt()
     {}
 
@@ -31,9 +59,18 @@ namespace labeling
         old_positions.push_back(point_ptr->get_label_offset());
     }
 
-    void sim_annealing_opt::unregister_label(screen_point_feature *)
+    void sim_annealing_opt::unregister_label(screen_point_feature *point_ptr)
     {
-        // TODO
+        auto pos = std::find(points_list.begin(),
+               points_list.end(),
+               point_ptr);
+        if(pos == points_list.end())
+        {
+            return;
+        }
+        size_t idx = pos - points_list.begin();
+        points_list.erase(pos);
+        old_positions.erase(old_positions.begin() + idx);
     }
 
     void sim_annealing_opt::register_obstacle(screen_obstacle *obstacle_ptr)
@@ -43,9 +80,14 @@ namespace labeling
 
     void sim_annealing_opt::unregister_obstacle(screen_obstacle *obstacle_ptr)
     {
-        obstacles_list.erase(std::find(obstacles_list.begin(),
-                                       obstacles_list.end(),
-                                       obstacle_ptr));
+        auto pos = std::find(obstacles_list.begin(),
+                             obstacles_list.end(),
+                             obstacle_ptr);
+        if(pos == obstacles_list.end())
+        {
+            return;
+        }
+        obstacles_list.erase(pos);
     }
 
 
@@ -95,8 +137,8 @@ namespace labeling
     {
         size_t idx = rand() % state.size();
         const size_i &label_size = points_list[idx]->get_label_size();
-        int w = label_size.w / 10 + 1;
-        int h = label_size.h / 10 + 1;
+        int w = label_size.w / STATE_CHANGE_FACTOR + 1;
+        int h = label_size.h / STATE_CHANGE_FACTOR + 1;
         int dx, dy;
         do
         {
@@ -118,10 +160,7 @@ namespace labeling
 
         double d_offset =
                 sqr_points_distance(new_offset, old_positions[i]);
-        if (d_offset != 0)
-        {
-            summ += 10 * d_offset;
-        }
+        summ += OFFSET_FACTOR * d_offset;
 
         double best_pos_penalty =
                 point_to_points_metric(
@@ -161,10 +200,7 @@ namespace labeling
             labels_intersection +=
                     rectangle_intersection(new_rect1, new_rect2);
         }
-        if(labels_intersection != 0)
-        {
-            summ += 4 * labels_intersection + 300;
-        }
+        summ += LABELS_INTERSECTION_PENALTY * labels_intersection;
 
         double obstacles_intersection = 0;
         for(screen_obstacle *obstacle_ptr: obstacles_list)
@@ -180,10 +216,7 @@ namespace labeling
                 break;
             }
         }
-        if(obstacles_intersection != 0)
-        {
-            summ += 1 * obstacles_intersection + 70;
-        }
+        summ += OBSTACLES_INTERSECTION_PENALTY * obstacles_intersection;
 
         return summ;
     }
@@ -200,7 +233,8 @@ namespace labeling
 #endif
         double t = 1;
         int iterations = 0;
-        int max_iterations = 100 * static_cast<int>(points_list.size());
+        int max_iterations =
+                MAX_ITERATIONS_FACTOR * static_cast<int>(points_list.size());
         int64_t current_time;
         do
         {

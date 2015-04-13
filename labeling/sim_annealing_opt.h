@@ -44,7 +44,7 @@ namespace labeling
         static double get_new_t(int iterations);
 
         /*
-         * @return closest distance between point and
+         * @return min distance between point and
          * points or double max value if points.size() == 0
          */
         static double point_to_points_metric(const geom2::point_i &point,
