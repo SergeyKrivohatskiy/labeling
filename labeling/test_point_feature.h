@@ -21,6 +21,7 @@ namespace labeling
         void set_label_offset(const geom2::point_i&);
 
         bool is_label_fixed() const;
+        void set_fixed(bool fixed);
 
         const prevered_pos_list& get_prefered_positions() const;
 

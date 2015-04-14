@@ -3,6 +3,7 @@
 #include <limits>
 #include <qelapsedtimer.h>
 #include <qpainter.h>
+#include <QMouseEvent>
 #include "base_screen_obstacle.h"
 #include "screen_obstacle.h"
 #include "test_point_feature.h"
@@ -22,45 +23,56 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow),
     timer(new QTimer()),
     time_to_optimize(5),
-    pos_optimizer(new labeling::sim_annealing_opt())
+    pos_optimizer(new labeling::sim_annealing_opt()),
+    max_point_speed(1)
 {
     ui->setupUi(this);
 
-    fill_screen(30, 5, 1);
+    field_size.w = size().width();
+    field_size.h = size().height();
+    fill_screen(30, 5);
 
     connect(timer.get(), SIGNAL(timeout()), this, SLOT(update()));
     update();
     timer->start(UPDATE_TIME_MS);
 }
 
-void MainWindow::fill_screen(int points_count,
-                             int obstacles_count,
-                             int max_speed)
+void MainWindow::add_point(const point_i &pos)
 {
-    size_i field_size{800, 600};
+    point_i speed(rand() % (2 * max_point_speed + 1) - max_point_speed,
+                  rand() % (2 * max_point_speed + 1) - max_point_speed);
+    auto new_point = new test_point_feature(pos,
+                                            speed,
+                                            field_size,
+                                            rand() % 2);
+    screen_points.push_back(
+                unique_ptr<screen_point_feature>(new_point));
+    pos_optimizer->register_label(new_point);
+}
+
+void MainWindow::add_obstacle()
+{
+    point_i pos(rand() % field_size.w, rand() % field_size.h);
+    size_i size{rand() % 150 + 50, rand() % 20 + 20};
+    screen_obstacle *new_obstacle =
+            new base_screen_obstacle(rectangle_i{pos, size});
+    screen_obstacles.push_back(
+                unique_ptr<screen_obstacle>(new_obstacle));
+    pos_optimizer->register_obstacle(new_obstacle);
+}
+
+void MainWindow::fill_screen(int points_count,
+                             int obstacles_count)
+{
     for(int i = 0; i < points_count; ++i)
     {
         point_i pos(rand() % field_size.w, rand() % field_size.h);
-        point_i speed(rand() % (2 * max_speed + 1) - max_speed,
-                      rand() % (2 * max_speed + 1) - max_speed);
-        auto new_point = new test_point_feature(pos,
-                                                speed,
-                                                field_size,
-                                                rand() % 2);
-        screen_points.push_back(
-                    unique_ptr<screen_point_feature>(new_point));
-        pos_optimizer->register_label(new_point);
+        add_point(pos);
     }
 
     for(int i = 0; i < obstacles_count; ++i)
     {
-        point_i pos(rand() % field_size.w, rand() % field_size.h);
-        size_i size{rand() % 150 + 50, rand() % 20 + 20};
-        screen_obstacle *new_obstacle =
-                new base_screen_obstacle(rectangle_i{pos, size});
-        screen_obstacles.push_back(
-                    unique_ptr<screen_obstacle>(new_obstacle));
-        pos_optimizer->register_obstacle(new_obstacle);
+        add_obstacle();
     }
 }
 
@@ -137,6 +149,54 @@ void MainWindow::paintEvent(QPaintEvent *)
         painter.drawRect(QRect(label_left_bottom,
                                to_qt(point->get_label_size())));
     }
+}
+
+namespace details
+{
+
+}
+
+void MainWindow::mousePressEvent(QMouseEvent *event)
+{
+    //    Left button on label make it fixed
+    //    Left button on point removes it
+    //    Left button on empty space adds new point
+    if(event->button() == Qt::LeftButton)
+    {
+        point_i pos(event->x(), event->y());
+        for(auto it = screen_points.begin(); it != screen_points.end(); ++ it)
+        {
+            test_point_feature* point =
+                    dynamic_cast<test_point_feature*>((*it).get());
+            if(points_distance(
+                        point->
+                        get_screen_pivot(),
+                        pos) < 10)
+            {
+                pos_optimizer->unregister_label(point);
+                screen_points.erase(it);
+                return;
+            }
+            rectangle_i label_rect{
+                        point->get_screen_pivot() +
+                        point->get_label_offset(),
+                        point->get_label_size()
+            };
+            if(point_in_rect(pos, label_rect))
+            {
+                point->set_fixed(!point->is_label_fixed());
+                return;
+            }
+        }
+        add_point(pos);
+        return;
+    }
+    if(event->button() == Qt::RightButton)
+    {
+        // TODO
+        return;
+    }
+    QMainWindow::mousePressEvent(event);
 }
 
 MainWindow::~MainWindow()

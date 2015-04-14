@@ -54,6 +54,11 @@ namespace labeling
         return is_fixed;
     }
 
+    void test_point_feature::set_fixed(bool fixed)
+    {
+        is_fixed = fixed;
+    }
+
     void test_point_feature::update_position()
     {
         position.x = (position.x + speed.x + field_size.w) % field_size.w;

@@ -23,10 +23,12 @@ public:
 
 protected:
     void paintEvent(QPaintEvent *);
+    void mousePressEvent(QMouseEvent *);
 private:
+    void add_obstacle();
+    void add_point(const geom2::point_i &pos);
     void fill_screen(int points_count,
-                     int obstacles_count,
-                     int max_speed);
+                     int obstacles_count);
 private slots:
     void update();
 
@@ -42,7 +44,8 @@ private:
     float time_to_optimize;
     screen_obstacles_t screen_obstacles;
     screen_points_t screen_points;
-
+    geom2::size_i field_size;
+    int max_point_speed;
 private:
     int labels_intersection();
 };
