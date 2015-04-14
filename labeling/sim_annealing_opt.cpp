@@ -211,6 +211,7 @@ namespace labeling
         return summ;
     }
 
+    // TODO add fixed labels logic
     void sim_annealing_opt::best_fit(float time_max)
     {
         auto start = high_resolution_clock::now();

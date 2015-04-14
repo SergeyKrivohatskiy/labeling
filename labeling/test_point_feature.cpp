@@ -47,6 +47,11 @@ namespace labeling
         return prefered_positions;
     }
 
+    bool test_point_feature::is_label_fixed() const
+    {
+        return false;
+    }
+
     void test_point_feature::update_position()
     {
         position.x = (position.x + speed.x + field_size.w) % field_size.w;

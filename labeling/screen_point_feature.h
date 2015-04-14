@@ -42,6 +42,13 @@ namespace labeling
         virtual void set_label_offset(geom2::point_i const &) = 0;
 
         /*
+         * If label is fixed it won't be moved by position optimizer
+         *
+         * @return true if label is fixed
+         */
+        virtual bool is_label_fixed() const = 0;
+
+        /*
          * @return a list of prefered positions. The empty list is
          * same(for positions optimizer) to list containing one
          * item == prevered_position(1.0, point_i{0, 0})
