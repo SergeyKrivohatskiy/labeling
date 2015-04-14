@@ -19,8 +19,8 @@ namespace labeling
         const geom2::point_i& get_label_offset() const;
         void set_label_offset(const geom2::point_i&);
 
-        const geom2::points_i_list& labels_best_positions() const;
-        const geom2::points_i_list& labels_good_positions() const;
+        const prevered_pos_list& get_prefered_positions() const;
+
         void update_position();
     private:
         geom2::point_i position;
@@ -28,8 +28,7 @@ namespace labeling
         geom2::size_i field_size;
         geom2::size_i label_size;
         geom2::point_i label_offset;
-        geom2::points_i_list best_positions;
-        geom2::points_i_list good_positions;
+        prevered_pos_list prefered_positions;
     };
 } // namespace labeling
 

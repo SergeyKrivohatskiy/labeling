@@ -17,6 +17,15 @@ namespace labeling
     class screen_point_feature
     {
     public:
+        /*
+         * Prefered position is a pair containing double priority and
+         * point relative to screen_pivot
+         * Prioriry might be from 0 to +inf
+         * ~1.0 - normal priority
+         */
+        typedef std::pair<double, geom2::point_i> prevered_position;
+        typedef std::vector<prevered_position> prevered_pos_list;
+    public:
         virtual ~screen_point_feature() {}
 
         /*
@@ -25,11 +34,19 @@ namespace labeling
         virtual const geom2::point_i& get_screen_pivot() const = 0;
         virtual const geom2::size_i& get_label_size() const = 0;
 
+        /*
+         * Current position of the label left bottom point relative
+         * to screen_pivot
+         */
         virtual const geom2::point_i& get_label_offset() const = 0;
         virtual void set_label_offset(geom2::point_i const &) = 0;
 
-        virtual const geom2::points_i_list& labels_best_positions() const = 0;
-        virtual const geom2::points_i_list& labels_good_positions() const = 0;
+        /*
+         * @return a list of prefered positions. The empty list is
+         * same(for positions optimizer) to list containing one
+         * item == prevered_position(1.0, point_i{0, 0})
+         */
+        virtual const prevered_pos_list& get_prefered_positions() const = 0;
     };
 } // namespace labeling
 #endif // SCREEN_POINT_FEATURE_H

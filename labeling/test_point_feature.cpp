@@ -14,9 +14,9 @@ namespace labeling
         label_size.h = 40;
         label_size.w = 100;
         label_offset.x = label_offset.y = 40;
-        best_positions.push_back(label_offset);
-        best_positions.push_back(point_i{-40, 40});
-        good_positions.push_back(point_i{40, -40});
+        prefered_positions.push_back(prevered_position(1.0, label_offset));
+        prefered_positions.push_back(prevered_position(1.0, point_i{-40, 40}));
+        prefered_positions.push_back(prevered_position(0.3, point_i{40, -40}));
     }
 
     test_point_feature::~test_point_feature()
@@ -41,14 +41,10 @@ namespace labeling
         label_offset = new_offset;
     }
 
-    const points_i_list& test_point_feature::labels_best_positions() const
+    const test_point_feature::prevered_pos_list&
+                        test_point_feature::get_prefered_positions() const
     {
-        return best_positions;
-    }
-
-    const points_i_list& test_point_feature::labels_good_positions() const
-    {
-        return good_positions;
+        return prefered_positions;
     }
 
     void test_point_feature::update_position()

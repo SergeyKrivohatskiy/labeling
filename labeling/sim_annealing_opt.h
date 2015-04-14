@@ -44,11 +44,11 @@ namespace labeling
         static double get_new_t(int iterations);
 
         /*
-         * @return min distance between point and
-         * points or double max value if points.size() == 0
+         * @return min distance between point and prefered
+         * points multuplied to weight
          */
         static double point_to_points_metric(const geom2::point_i &point,
-                                             const geom2::points_i_list &points);
+                      const screen_point_feature::prevered_pos_list &points);
     };
 } // namespace labeling
 #endif // SIM_ANNEALING_OPT_H

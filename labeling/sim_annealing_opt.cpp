@@ -40,9 +40,14 @@ namespace labeling
     const double LABELS_INTERSECTION_PENALTY = 4;
     /*
      * Correct values from 0 to +inf
-     * Affect penalty for label-obstacle intersection
+     * Affect penalty for label-obstacle intersections
      */
     const double OBSTACLES_INTERSECTION_PENALTY = 1;
+    /*
+     * Correct values from 0 to +inf
+     * Affect penalty for label-prefered position weighted distances
+     */
+    const double PREFERED_POSITIONS_PENALTY = 5;
 } // namespace labeling
 
 namespace labeling
@@ -162,26 +167,8 @@ namespace labeling
                 sqr_points_distance(new_offset, old_positions[i]);
         summ += OFFSET_FACTOR * d_offset;
 
-        double best_pos_penalty =
-                point_to_points_metric(
-                    new_offset, point_ptr1->labels_best_positions());
-        double min_penalty = 0;
-        if(best_pos_penalty != double_limits::max())
-        {
-            best_pos_penalty *= 5;
-            min_penalty = best_pos_penalty;
-        }
-        double good_pos_penalty =
-                point_to_points_metric(
-                    new_offset, point_ptr1->labels_good_positions());
-        if(good_pos_penalty != double_limits::max())
-        {
-            good_pos_penalty *= 1;
-            min_penalty = min(best_pos_penalty, good_pos_penalty + 300);
-        }
-        if (min_penalty != 0) {
-            summ += min_penalty + 100;
-        }
+        summ += PREFERED_POSITIONS_PENALTY * point_to_points_metric(
+                    new_offset, point_ptr1->get_prefered_positions());
 
         double labels_intersection = 0;
         rectangle_i new_rect1 =
@@ -272,12 +259,19 @@ namespace labeling
     }
 
     double sim_annealing_opt::point_to_points_metric(
-            const point_i &point, const points_i_list &points)
+            const point_i &point,
+            const screen_point_feature::prevered_pos_list &points)
     {
-        double min_distance = double_limits::max();
-        for(const point_i &second_point: points)
+        if(points.size() == 0)
         {
-            double cur_distance = sqr_points_distance(point, second_point);
+            return sqr_points_distance(point, point_i());
+        }
+        double min_distance = double_limits::max();
+        for(const screen_point_feature::prevered_position &second_point: points)
+        {
+            double cur_distance =
+                    second_point.first *
+                    sqr_points_distance(point, second_point.second);
             min_distance = min(min_distance, cur_distance);
         }
         return min_distance;
