@@ -9,8 +9,9 @@ namespace labeling
     {
     public:
         test_point_feature(const geom2::point_i &position,
-                             const geom2::point_i &speed,
-                             const geom2::size_i &field_size);
+                           const geom2::point_i &speed,
+                           const geom2::size_i &field_size,
+                           bool is_fixed);
         ~test_point_feature();
 
         const geom2::point_i& get_screen_pivot() const;
@@ -31,6 +32,7 @@ namespace labeling
         geom2::size_i label_size;
         geom2::point_i label_offset;
         prevered_pos_list prefered_positions;
+        bool is_fixed;
     };
 } // namespace labeling
 

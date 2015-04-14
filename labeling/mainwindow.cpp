@@ -43,7 +43,10 @@ void MainWindow::fill_screen(int points_count,
         point_i pos(rand() % field_size.w, rand() % field_size.h);
         point_i speed(rand() % (2 * max_speed + 1) - max_speed,
                       rand() % (2 * max_speed + 1) - max_speed);
-        auto new_point = new test_point_feature(pos, speed, field_size);
+        auto new_point = new test_point_feature(pos,
+                                                speed,
+                                                field_size,
+                                                rand() % 2);
         screen_points.push_back(
                     unique_ptr<screen_point_feature>(new_point));
         pos_optimizer->register_label(new_point);

@@ -5,11 +5,13 @@ namespace labeling
 {
     test_point_feature::test_point_feature(const geom2::point_i &position,
                                            const geom2::point_i &speed,
-                                           const geom2::size_i &field_size)
+                                           const geom2::size_i &field_size,
+                                           bool is_fixed)
         :
           position(position),
           speed(speed),
-          field_size(field_size)
+          field_size(field_size),
+          is_fixed(is_fixed)
     {
         label_size.h = 40;
         label_size.w = 100;
@@ -49,7 +51,7 @@ namespace labeling
 
     bool test_point_feature::is_label_fixed() const
     {
-        return false;
+        return is_fixed;
     }
 
     void test_point_feature::update_position()

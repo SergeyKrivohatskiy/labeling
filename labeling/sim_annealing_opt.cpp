@@ -108,9 +108,18 @@ namespace labeling
         state_t state;
         // removing const. Points reordering do not changes optimizer state
         points_list_t &p_list = const_cast<points_list_t&>(points_list);
-        auto fixed_beg = std::remove_if(p_list.begin(),
-                                        p_list.end(),
-                                        detail::point_label_fixed);
+        auto fixed_beg = p_list.begin();
+        // Move point with fixed labels to the end
+        for(auto it = p_list.begin(); it != p_list.end(); ++it)
+        {
+            if (!(*it)->is_label_fixed()) {
+                auto tmp = *fixed_beg;
+                *fixed_beg = *it;
+                *it = tmp;
+                ++fixed_beg;
+            }
+        }
+
         state.reserve(fixed_beg - points_list.begin());
         for(auto it = points_list.begin(); it != fixed_beg; ++it)
         {
@@ -185,7 +194,7 @@ namespace labeling
         rectangle_i new_rect1 =
             {new_offset + point_ptr1->get_screen_pivot(),
              point_ptr1->get_label_size()};
-        for(size_t j = 0; j < points_list.size(); ++j)
+        for(size_t j = 0; j < state.size(); ++j)
         {
             if(i == j)
             {
@@ -194,9 +203,15 @@ namespace labeling
             rectangle_i new_rect2 =
                 {state[j] + points_list[j]->get_screen_pivot(),
                  points_list[j]->get_label_size()};
-
-            labels_intersection +=
-                    rectangle_intersection(new_rect1, new_rect2);
+            labels_intersection += rectangle_intersection(new_rect1, new_rect2);
+        }
+        for(size_t j = state.size(); j < points_list.size(); ++j)
+        {
+            rectangle_i new_rect2 =
+                {points_list[j]->get_screen_pivot() +
+                 points_list[j]->get_label_offset(),
+                 points_list[j]->get_label_size()};
+            labels_intersection += rectangle_intersection(new_rect1, new_rect2);
         }
         summ += LABELS_INTERSECTION_PENALTY * labels_intersection;
 
