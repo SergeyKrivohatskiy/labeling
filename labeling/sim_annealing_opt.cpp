@@ -61,7 +61,6 @@ namespace labeling
     void sim_annealing_opt::register_label(screen_point_feature *point_ptr)
     {
         points_list.push_back(point_ptr);
-        old_positions.push_back(point_ptr->get_label_offset());
     }
 
     void sim_annealing_opt::unregister_label(screen_point_feature *point_ptr)
@@ -73,9 +72,7 @@ namespace labeling
         {
             return;
         }
-        size_t idx = pos - points_list.begin();
         points_list.erase(pos);
-        old_positions.erase(old_positions.begin() + idx);
     }
 
     void sim_annealing_opt::register_obstacle(screen_obstacle *obstacle_ptr)
@@ -124,7 +121,6 @@ namespace labeling
         {
             points_list[i]->set_label_offset(state[i]);
         }
-        old_positions = state;
     }
 
     double sim_annealing_opt::get_new_t(int iterations)
@@ -164,7 +160,7 @@ namespace labeling
         point_i new_offset = state[i] + offset_change;
 
         double d_offset =
-                sqr_points_distance(new_offset, old_positions[i]);
+                sqr_points_distance(new_offset, point_ptr1->get_label_offset());
         summ += OFFSET_FACTOR * d_offset;
 
         summ += PREFERED_POSITIONS_PENALTY * point_to_points_metric(
@@ -174,7 +170,7 @@ namespace labeling
         rectangle_i new_rect1 =
             {new_offset + point_ptr1->get_screen_pivot(),
              point_ptr1->get_label_size()};
-        for(size_t j = 0; j < state.size(); ++j)
+        for(size_t j = 0; j < points_list.size(); ++j)
         {
             if(i == j)
             {

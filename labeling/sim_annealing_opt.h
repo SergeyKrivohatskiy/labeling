@@ -30,7 +30,6 @@ namespace labeling
     private:
         points_list_t points_list;
         obstacles_list_t obstacles_list;
-        state_t old_positions;
     private:
         double calc_metric(const state_t &state, size_t i,
                            const geom2::point_i &new_offset) const;
