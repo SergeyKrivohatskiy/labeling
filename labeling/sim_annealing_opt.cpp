@@ -6,6 +6,8 @@
 #define DEBUG
 #ifdef DEBUG
 #include <QtDebug>
+double METRIC_CHANGE_SUMM = 0;
+double FITS_COUNT = 0;
 #endif
 
 
@@ -25,7 +27,22 @@ namespace labeling
     const int STATE_CHANGE_FACTOR = 10;
     /*
      * Correct values from 1 to MAX_INT/max_points_count(to avoid an overflow)
-     * The bigger the less steps will be generated each iteration
+     * Affects max iteration
+     * (max_iteration = MAX_ITERATIONS_FACTOR * points_count)
+     *
+     * Here is a table of MAX_ITERATIONS_FACTOR affecting
+     * optimization(in terms of average metric change) for points_count = 100
+     *
+     * MAX_ITERATIONS_FACTOR    optimization
+     * 1                        20%
+     * 5                        43%
+     * 10                       61%
+     * 30                       84%
+     * 50                       91%
+     * 70                       92%
+     * 100                      95%
+     * 200                      100%
+     * 400                      101%
      */
     const int MAX_ITERATIONS_FACTOR = 100;
     /*
@@ -48,16 +65,6 @@ namespace labeling
      * Affect penalty for label-prefered position weighted distances
      */
     const double PREFERED_POSITIONS_PENALTY = 5;
-} // namespace labeling
-
-namespace labeling
-{
-    namespace detail {
-        bool point_label_fixed(const screen_point_feature *point_ptr)
-        {
-            return point_ptr->is_label_fixed();
-        }
-    }
 } // namespace labeling
 
 namespace labeling
@@ -256,7 +263,7 @@ namespace labeling
         double t = 1;
         int iterations = 0;
         int max_iterations =
-                MAX_ITERATIONS_FACTOR * static_cast<int>(points_list.size());
+                MAX_ITERATIONS_FACTOR * static_cast<int>(state.size());
         int64_t current_time;
         do
         {
@@ -285,8 +292,11 @@ namespace labeling
 
         apply_state(state);
 #ifdef DEBUG
+        METRIC_CHANGE_SUMM += metric_change;
+        FITS_COUNT += 1;
         qDebug() << metric_change << " metric_change";
         qDebug() << iterations << " iterations";
+        qDebug() << METRIC_CHANGE_SUMM / FITS_COUNT << " average change";
 #endif
     }
 
@@ -296,15 +306,17 @@ namespace labeling
     {
         if(points.size() == 0)
         {
-            return sqr_points_distance(point, point_i());
+            return 2 * sqr_points_distance(point, point_i());
         }
         double min_distance = double_limits::max();
+        double max_distance = double_limits::min();
         for(const screen_point_feature::prevered_position &second_point: points)
         {
             double cur_distance =
                     second_point.first *
                     sqr_points_distance(point, second_point.second);
             min_distance = min(min_distance, cur_distance);
+            max_distance = std::max(max_distance, cur_distance);
         }
         return min_distance;
     }
