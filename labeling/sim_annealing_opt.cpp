@@ -52,6 +52,16 @@ namespace labeling
 
 namespace labeling
 {
+    namespace detail {
+        bool point_label_fixed(const screen_point_feature *point_ptr)
+        {
+            return point_ptr->is_label_fixed();
+        }
+    }
+} // namespace labeling
+
+namespace labeling
+{
     sim_annealing_opt::sim_annealing_opt()
     {}
 
@@ -96,10 +106,15 @@ namespace labeling
     sim_annealing_opt::state_t sim_annealing_opt::init_state() const
     {
         state_t state;
-        state.reserve(points_list.size());
-        for(auto point_ptr: points_list)
+        // removing const. Points reordering do not changes optimizer state
+        points_list_t &p_list = const_cast<points_list_t&>(points_list);
+        auto fixed_beg = std::remove_if(p_list.begin(),
+                                        p_list.end(),
+                                        detail::point_label_fixed);
+        state.reserve(fixed_beg - points_list.begin());
+        for(auto it = points_list.begin(); it != fixed_beg; ++it)
         {
-            state.push_back(point_ptr->get_label_offset());
+            state.push_back((*it)->get_label_offset());
         }
         return state;
     }
@@ -207,12 +222,17 @@ namespace labeling
         return summ;
     }
 
-    // TODO add fixed labels logic
     void sim_annealing_opt::best_fit(float time_max)
     {
         auto start = high_resolution_clock::now();
 
         state_t state = init_state();
+        // there is no not fixed points
+        // nothing to optimize
+        if(!state.size())
+        {
+            return;
+        }
         std::vector<double> metrics = init_metric(state);
 
 #ifdef DEBUG
