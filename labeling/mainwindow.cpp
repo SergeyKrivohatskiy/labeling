@@ -108,9 +108,10 @@ void MainWindow::paintEvent(QPaintEvent *)
     for(auto &point_u_ptr: screen_points)
     {
         screen_point_feature *point = point_u_ptr.get();
-        painter.setPen(QPen(Qt::blue, 10));
+        auto point_color = point->is_label_fixed() ? Qt::darkCyan : Qt::blue;
+        painter.setPen(QPen(point_color, 10));
         painter.drawPoint(to_qt(point->get_screen_pivot()));
-        painter.setPen(QPen(Qt::blue, 1));
+        painter.setPen(QPen(point_color, 1));
         QPoint label_left_bottom =
                 to_qt(point->get_screen_pivot() +
                       point->get_label_offset());
@@ -132,7 +133,7 @@ void MainWindow::paintEvent(QPaintEvent *)
                              to_qt(point->get_screen_pivot()));
         } // else- line is under the label
 
-        painter.setPen(QPen(Qt::blue, 3));
+        painter.setPen(QPen(point_color, 3));
         painter.drawRect(QRect(label_left_bottom,
                                to_qt(point->get_label_size())));
     }
