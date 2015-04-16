@@ -28,9 +28,6 @@ namespace labeling
         typedef std::pair<size_t, geom2::point_i> dstate_t;
         typedef std::vector<screen_obstacle*> obstacles_list_t;
     private:
-        points_list_t points_list;
-        obstacles_list_t obstacles_list;
-    private:
         double calc_metric(const state_t &state, size_t i,
                            const geom2::point_i &new_offset) const;
         void apply_state(const state_t &state);
@@ -43,6 +40,9 @@ namespace labeling
         static double get_new_t(int iterations);
         static double point_to_points_metric(const geom2::point_i &point,
                       const screen_point_feature::prefered_pos_list &points);
+    private:
+        points_list_t points_list;
+        obstacles_list_t obstacles_list;
     };
 } // namespace labeling
 #endif // SIM_ANNEALING_OPT_H

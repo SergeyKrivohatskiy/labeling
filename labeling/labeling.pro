@@ -27,6 +27,10 @@ HEADERS  += mainwindow.h \
     base_screen_obstacle.h \
     test_point_feature.h \
     geom2_to_qt.h \
-    sim_annealing_opt.h
+    sim_annealing_opt.h \
+    point.h \
+    segment.h \
+    rectangle.h \
+    size.h
 
 FORMS    += mainwindow.ui
