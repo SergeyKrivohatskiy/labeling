@@ -3,7 +3,7 @@
 #include <math.h>
 #include <random>
 #include <limits>
-#define DEBUG
+//#define DEBUG
 #ifdef DEBUG
 #include <QtDebug>
 double METRIC_CHANGE_SUMM = 0;

@@ -5,7 +5,7 @@
 #include <qtimer.h>
 #include <memory>
 #include <vector>
-#include "positions_optimizer.h"
+#include "labeling/positions_optimizer.h"
 
 const int UPDATE_TIME_MS = 50;
 const float TIME_TO_OPTIMIZE = 4;

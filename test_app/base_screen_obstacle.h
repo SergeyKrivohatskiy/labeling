@@ -1,7 +1,7 @@
 #ifndef BASE_SCREEN_OBSTACLE_H
 #define BASE_SCREEN_OBSTACLE_H
 
-#include "screen_obstacle.h"
+#include "labeling/screen_obstacle.h"
 
 namespace labeling
 {

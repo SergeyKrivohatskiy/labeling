@@ -1,6 +1,6 @@
 #ifndef GEOM2_TO_QT
 #define GEOM2_TO_QT
-#include "geometry.h"
+#include "labeling/geometry.h"
 #include <QPoint>
 #include <QRect>
 #include <QLine>

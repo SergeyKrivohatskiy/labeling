@@ -1,7 +1,7 @@
 #ifndef TEST_POINT_FEATURE_H
 #define TEST_POINT_FEATURE_H
 
-#include "screen_point_feature.h"
+#include "labeling/screen_point_feature.h"
 
 namespace labeling
 {

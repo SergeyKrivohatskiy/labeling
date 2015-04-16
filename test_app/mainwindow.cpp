@@ -5,9 +5,9 @@
 #include <qpainter.h>
 #include <QMouseEvent>
 #include "base_screen_obstacle.h"
-#include "screen_obstacle.h"
+#include "labeling/screen_obstacle.h"
 #include "test_point_feature.h"
-#include "sim_annealing_opt.h"
+#include "labeling/sim_annealing_opt.h"
 #include "geom2_to_qt.h"
 
 using namespace geom2;
