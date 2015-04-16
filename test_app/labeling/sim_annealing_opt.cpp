@@ -3,6 +3,7 @@
 #include <math.h>
 #include <random>
 #include <limits>
+#include "utils.h"
 //#define DEBUG
 #ifdef DEBUG
 #include <QtDebug>
@@ -212,10 +213,7 @@ namespace labeling
         }
         for(size_t j = state.size(); j < points_list.size(); ++j)
         {
-            rectangle_i label_rect2 =
-                {points_list[j]->get_screen_pivot() +
-                 points_list[j]->get_label_offset(),
-                 points_list[j]->get_label_size()};
+            rectangle_i label_rect2 = to_label_rect(points_list[j]);
             labels_intersection += rectangle_intersection(label_rect, label_rect2);
         }
         summ += LABELS_INTERSECTION_PENALTY * labels_intersection;

@@ -9,6 +9,7 @@
 #include "test_point_feature.h"
 #include "labeling/sim_annealing_opt.h"
 #include "geom2_to_qt.h"
+#include "labeling/utils.h"
 
 using namespace geom2;
 using labeling::screen_obstacle;
@@ -127,17 +128,12 @@ void MainWindow::paintEvent(QPaintEvent *)
         QPoint label_left_bottom =
                 to_qt(point->get_screen_pivot() +
                       point->get_label_offset());
-        point_i label_center =
-                point->get_screen_pivot() +
-                point->get_label_offset() +
-                static_cast<point_i>(point->get_label_size()) / 2;
+        point_i label_center = labeling::to_label_rect(point).center();
 
         point_i intersection_point;
         if(seg_rect_intersection(segment_i{label_center,
                                  point->get_screen_pivot()},
-                                 rectangle_i{point->get_screen_pivot() +
-                                 point->get_label_offset(),
-                                 point->get_label_size()},
+                                 labeling::to_label_rect(point),
                                  &intersection_point,
                                  static_cast<point_i *>(nullptr)))
         {
@@ -177,11 +173,7 @@ void MainWindow::mousePressEvent(QMouseEvent *event)
                 screen_points.erase(it);
                 return;
             }
-            rectangle_i label_rect{
-                        point->get_screen_pivot() +
-                        point->get_label_offset(),
-                        point->get_label_size()
-            };
+            rectangle_i label_rect = labeling::to_label_rect(point);
             if(point_in_rect(pos, label_rect))
             {
                 point->set_fixed(!point->is_label_fixed());

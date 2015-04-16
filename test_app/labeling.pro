@@ -16,7 +16,8 @@ SOURCES += main.cpp\
     base_screen_obstacle.cpp \
     test_point_feature.cpp \
     geom2_to_qt.cpp \
-    labeling/sim_annealing_opt.cpp
+    labeling/sim_annealing_opt.cpp \
+    labeling/utils.cpp
 
 HEADERS  += mainwindow.h \
     base_screen_obstacle.h \
@@ -30,6 +31,7 @@ HEADERS  += mainwindow.h \
     labeling/screen_point_feature.h \
     labeling/segment.h \
     labeling/sim_annealing_opt.h \
-    labeling/size.h
+    labeling/size.h \
+    labeling/utils.h
 
 FORMS    += mainwindow.ui
