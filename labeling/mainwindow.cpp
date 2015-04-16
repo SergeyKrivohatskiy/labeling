@@ -22,15 +22,13 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
     timer(new QTimer()),
-    time_to_optimize(5),
-    pos_optimizer(new labeling::sim_annealing_opt()),
-    max_point_speed(1)
+    pos_optimizer(new labeling::sim_annealing_opt())
 {
     ui->setupUi(this);
 
     field_size.w = size().width();
     field_size.h = size().height();
-    fill_screen(30, 5);
+    fill_screen(INIT_POINTS_COUNT, INIT_OBSTACLES_COUNT);
 
     connect(timer.get(), SIGNAL(timeout()), this, SLOT(update()));
     update();
@@ -39,12 +37,14 @@ MainWindow::MainWindow(QWidget *parent) :
 
 void MainWindow::add_point(const point_i &pos)
 {
-    point_i speed(rand() % (2 * max_point_speed + 1) - max_point_speed,
-                  rand() % (2 * max_point_speed + 1) - max_point_speed);
+    double to_0_1 = 1.0 / RAND_MAX;
+    point_d speed(rand() * to_0_1 * (2 * MAX_POINT_SPEED) - MAX_POINT_SPEED,
+                  rand() * to_0_1 * (2 * MAX_POINT_SPEED) - MAX_POINT_SPEED);
     auto new_point = new test_point_feature(pos,
                                             speed,
                                             field_size,
-                                            rand() % 2);
+                                            rand() % 2,
+                                            rand() * to_0_1 * MAX_POINT_ROT);
     screen_points.push_back(
                 unique_ptr<screen_point_feature>(new_point));
     pos_optimizer->register_label(new_point);
@@ -85,14 +85,14 @@ void MainWindow::update()
 
     QElapsedTimer ellapsed_timer;
     ellapsed_timer.start();
-    pos_optimizer->best_fit(time_to_optimize);
+    pos_optimizer->best_fit(TIME_TO_OPTIMIZE);
     qint32 ellapsed_ms = ellapsed_timer.nsecsElapsed() / 1000 / 1000;
 
     QString newStatus = QString("time limit: %1 ms\n"
                                 "actual time: %2 ms\n"
                                 "obstacles count: %3\n"
                                 "points count: %4\n")
-            .arg(time_to_optimize)
+            .arg(TIME_TO_OPTIMIZE)
             .arg(ellapsed_ms)
             .arg(screen_obstacles.size())
             .arg(screen_points.size());
@@ -191,6 +191,8 @@ void MainWindow::mousePressEvent(QMouseEvent *event)
         add_point(pos);
         return;
     }
+    //    Right button on obstacle removes it
+    //    Right button on empty space adds new obstacle
     if(event->button() == Qt::RightButton)
     {
         // TODO

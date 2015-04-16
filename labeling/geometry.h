@@ -58,37 +58,29 @@ namespace geom2
     template<class T>
     point<T> point<T>::operator+(const point &other) const
     {
-        point new_point;
-        new_point.x = x + other.x;
-        new_point.y = y + other.y;
-        return new_point;
+        return point(x + other.x,
+                     y + other.y);
     }
 
     template<class T>
     point<T> point<T>::operator*(const T &v) const
     {
-        point new_point;
-        new_point.x = x * v;
-        new_point.y = y * v;
-        return new_point;
+        return point(x * v,
+                     y * v);
     }
 
     template<class T>
     point<T> point<T>::operator/(const T &v) const
     {
-        point new_point;
-        new_point.x = x / v;
-        new_point.y = y / v;
-        return new_point;
+        return point(x / v,
+                     y / v);
     }
 
     template<class T>
     point<T> point<T>::operator-(const point &other) const
     {
-        point new_point;
-        new_point.x = x - other.x;
-        new_point.y = y - other.y;
-        return new_point;
+        return point(x - other.x,
+                     y - other.y);
     }
 
     template<class T>
