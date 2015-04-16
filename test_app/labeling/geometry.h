@@ -21,14 +21,17 @@ namespace geom2
     template<class T>
     bool point_in_rect(const point<T> &p, const rectangle<T> &r)
     {
-        return p.x >= r.left_bottom.x && p.y >= r.left_bottom.y &&
-                p.x <= r.left_bottom.x + r.size.w &&
-                p.y <= r.left_bottom.y + r.size.h;
+        return value_in_range(p.x,
+                              r.left_bottom.x,
+                              r.left_bottom.x + r.size.w) &&
+               value_in_range(p.y,
+                              r.left_bottom.y,
+                              r.left_bottom.y + r.size.h);
     }
 
     /*
      * Calculates area of rectangles intersection
-     * Rectangle sizes should be not negative(>= 0)
+     * Rectangle sizes should be non negative(>= 0)
      */
     template<class T>
     T rectangle_intersection(const rectangle<T> &l, const rectangle<T> &r)
@@ -135,12 +138,12 @@ namespace geom2
     {
         segment<T> rect_seg[4] = {
             {rect.left_bottom,
-             rect.left_bottom + point<T>(rect.size.w, 0)},
-            {rect.left_bottom + point<T>(rect.size.h, 0),
-             rect.left_bottom + rect.size},
-            {rect.left_bottom + rect.size,
-             rect.left_bottom + point<T>(0, rect.size.h)},
-            {rect.left_bottom + point<T>(0, rect.size.h),
+             rect.right_bottom()},
+            {rect.right_bottom(),
+             rect.right_up()},
+            {rect.right_up(),
+             rect.left_up()},
+            {rect.left_up(),
              rect.left_bottom}};
         int intersections = 0;
         point<T> intersection_point;

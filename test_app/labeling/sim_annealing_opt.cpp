@@ -110,14 +110,12 @@ namespace labeling
     }
 
 
-    sim_annealing_opt::state_t sim_annealing_opt::init_state() const
+    sim_annealing_opt::state_t sim_annealing_opt::init_state()
     {
         state_t state;
-        // removing const. Points reordering do not changes optimizer state
-        points_list_t &p_list = const_cast<points_list_t&>(points_list);
-        auto fixed_beg = p_list.begin();
+        auto fixed_beg = points_list.begin();
         // Move point with fixed labels to the end
-        for(auto it = p_list.begin(); it != p_list.end(); ++it)
+        for(auto it = points_list.begin(); it != points_list.end(); ++it)
         {
             if (!(*it)->is_label_fixed()) {
                 auto tmp = *fixed_beg;
@@ -187,38 +185,38 @@ namespace labeling
     {
         double summ = 0;
 
-        const screen_point_feature *point_ptr1 = points_list[i];
+        const screen_point_feature *point = points_list[i];
         point_i new_offset = state[i] + offset_change;
 
-        double d_offset =
-                sqr_points_distance(new_offset, point_ptr1->get_label_offset());
-        summ += OFFSET_FACTOR * d_offset;
+        summ += OFFSET_FACTOR * sqr_points_distance(
+                    new_offset, point->get_label_offset());
 
         summ += PREFERED_POSITIONS_PENALTY * point_to_points_metric(
-                    new_offset, point_ptr1->get_prefered_positions());
+                    new_offset, point->get_prefered_positions());
 
+        rectangle_i label_rect =
+            {new_offset + point->get_screen_pivot(),
+             point->get_label_size()};
         double labels_intersection = 0;
-        rectangle_i new_rect1 =
-            {new_offset + point_ptr1->get_screen_pivot(),
-             point_ptr1->get_label_size()};
         for(size_t j = 0; j < state.size(); ++j)
         {
             if(i == j)
             {
                 continue;
             }
-            rectangle_i new_rect2 =
+            rectangle_i label_rect2 =
                 {state[j] + points_list[j]->get_screen_pivot(),
                  points_list[j]->get_label_size()};
-            labels_intersection += rectangle_intersection(new_rect1, new_rect2);
+            labels_intersection +=
+                    rectangle_intersection(label_rect, label_rect2);
         }
         for(size_t j = state.size(); j < points_list.size(); ++j)
         {
-            rectangle_i new_rect2 =
+            rectangle_i label_rect2 =
                 {points_list[j]->get_screen_pivot() +
                  points_list[j]->get_label_offset(),
                  points_list[j]->get_label_size()};
-            labels_intersection += rectangle_intersection(new_rect1, new_rect2);
+            labels_intersection += rectangle_intersection(label_rect, label_rect2);
         }
         summ += LABELS_INTERSECTION_PENALTY * labels_intersection;
 
@@ -228,14 +226,14 @@ namespace labeling
             switch (obstacle_ptr->get_type()) {
             case screen_obstacle::box:
                 obstacles_intersection +=
-                        rectangle_intersection(new_rect1,
+                        rectangle_intersection(label_rect,
                                                *(obstacle_ptr->get_box()));
                 break;
             case screen_obstacle::segment:
                 obstacles_intersection +=
                         get_sqr_seg_rect_intersection(
                             *(obstacle_ptr->get_segment()),
-                            new_rect1);
+                            label_rect);
                 break;
             }
         }
@@ -269,6 +267,9 @@ namespace labeling
         {
             dstate_t d_state = update_state(state);
 
+            // This is not accurate d_metric calculation. But it works too
+            // Accurate calculation is "calc_metric(,, d_state.second) -
+            // calc_metric(,,zero_offset)"
             double d_metric =
                     calc_metric(state, d_state.first, d_state.second) -
                     metrics[d_state.first];
@@ -306,17 +307,15 @@ namespace labeling
     {
         if(points.size() == 0)
         {
-            return 2 * sqr_points_distance(point, point_i());
+            return sqr_points_distance(point, point_i());
         }
         double min_distance = double_limits::max();
-        double max_distance = double_limits::min();
         for(const screen_point_feature::prefered_position &second_point: points)
         {
             double cur_distance =
                     second_point.first *
                     sqr_points_distance(point, second_point.second);
             min_distance = min(min_distance, cur_distance);
-            max_distance = std::max(max_distance, cur_distance);
         }
         return min_distance;
     }

@@ -32,7 +32,7 @@ namespace labeling
                            const geom2::point_i &new_offset) const;
         void apply_state(const state_t &state);
         dstate_t update_state(const state_t &state);
-        state_t init_state() const;
+        state_t init_state();
         std::vector<double> sim_annealing_opt::init_metric(
                 const state_t &state);
     private:
