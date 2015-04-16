@@ -302,7 +302,7 @@ namespace labeling
 
     double sim_annealing_opt::point_to_points_metric(
             const point_i &point,
-            const screen_point_feature::prevered_pos_list &points)
+            const screen_point_feature::prefered_pos_list &points)
     {
         if(points.size() == 0)
         {
@@ -310,7 +310,7 @@ namespace labeling
         }
         double min_distance = double_limits::max();
         double max_distance = double_limits::min();
-        for(const screen_point_feature::prevered_position &second_point: points)
+        for(const screen_point_feature::prefered_position &second_point: points)
         {
             double cur_distance =
                     second_point.first *

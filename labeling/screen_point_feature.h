@@ -23,8 +23,8 @@ namespace labeling
          * Prioriry might be from 0 to +inf
          * ~1.0 - normal priority
          */
-        typedef std::pair<double, geom2::point_i> prevered_position;
-        typedef std::vector<prevered_position> prevered_pos_list;
+        typedef std::pair<double, geom2::point_i> prefered_position;
+        typedef std::vector<prefered_position> prefered_pos_list;
     public:
         virtual ~screen_point_feature() {}
 
@@ -53,7 +53,7 @@ namespace labeling
          * same(for positions optimizer) to list containing one
          * item == prevered_position(1.0, point_i{0, 0})
          */
-        virtual const prevered_pos_list& get_prefered_positions() const = 0;
+        virtual const prefered_pos_list& get_prefered_positions() const = 0;
     };
 } // namespace labeling
 #endif // SCREEN_POINT_FEATURE_H

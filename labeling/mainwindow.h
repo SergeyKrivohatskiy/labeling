@@ -7,7 +7,12 @@
 #include <vector>
 #include "positions_optimizer.h"
 
-const int UPDATE_TIME_MS = 200;
+const int UPDATE_TIME_MS = 50;
+const float TIME_TO_OPTIMIZE = 4;
+const double MAX_POINT_SPEED = 0.5;
+const double MAX_POINT_ROT = 2 * 3.14 / 360 * 1;
+const int INIT_POINTS_COUNT = 30;
+const int INIT_OBSTACLES_COUNT = 10;
 
 namespace Ui {
 class MainWindow;
@@ -41,11 +46,9 @@ private:
     std::unique_ptr<Ui::MainWindow> ui;
     std::unique_ptr<QTimer> timer;
     std::unique_ptr<labeling::positions_optimizer> pos_optimizer;
-    float time_to_optimize;
     screen_obstacles_t screen_obstacles;
     screen_points_t screen_points;
     geom2::size_i field_size;
-    int max_point_speed;
 private:
     int labels_intersection();
 };

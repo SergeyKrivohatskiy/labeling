@@ -41,13 +41,8 @@ namespace labeling
     private:
         static bool do_jump(double t, double d_metrics);
         static double get_new_t(int iterations);
-
-        /*
-         * @return min distance between point and prefered
-         * points multuplied to weight
-         */
         static double point_to_points_metric(const geom2::point_i &point,
-                      const screen_point_feature::prevered_pos_list &points);
+                      const screen_point_feature::prefered_pos_list &points);
     };
 } // namespace labeling
 #endif // SIM_ANNEALING_OPT_H

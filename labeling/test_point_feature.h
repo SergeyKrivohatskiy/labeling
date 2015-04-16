@@ -9,9 +9,10 @@ namespace labeling
     {
     public:
         test_point_feature(const geom2::point_i &position,
-                           const geom2::point_i &speed,
+                           const geom2::point_d &speed,
                            const geom2::size_i &field_size,
-                           bool is_fixed);
+                           bool is_fixed,
+                           double rotation = 0);
         ~test_point_feature();
 
         const geom2::point_i& get_screen_pivot() const;
@@ -23,16 +24,17 @@ namespace labeling
         bool is_label_fixed() const;
         void set_fixed(bool fixed);
 
-        const prevered_pos_list& get_prefered_positions() const;
+        const prefered_pos_list& get_prefered_positions() const;
 
         void update_position();
     private:
         geom2::point_i position;
-        geom2::point_i speed;
+        geom2::point_d exact_position;
+        geom2::point_d speed;
         geom2::size_i field_size;
         geom2::size_i label_size;
         geom2::point_i label_offset;
-        prevered_pos_list prefered_positions;
+        prefered_pos_list prefered_positions;
         bool is_fixed;
     };
 } // namespace labeling
