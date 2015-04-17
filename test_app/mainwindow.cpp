@@ -44,7 +44,7 @@ void MainWindow::add_point(const point_i &pos)
     auto new_point = new test_point_feature(pos,
                                             speed,
                                             field_size,
-                                            rand() % 2,
+                                            rand() * to_0_1 < FIXED_POINT_P,
                                             rand() * to_0_1 * MAX_POINT_ROT);
     screen_points.push_back(
                 unique_ptr<screen_point_feature>(new_point));
