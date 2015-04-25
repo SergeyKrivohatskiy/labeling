@@ -20,7 +20,8 @@ SOURCES += main.cpp\
     geom2_to_qt.cpp \
     labeling/sim_annealing_opt.cpp \
     labeling/utils.cpp \
-    labeling/ray_intersection_opt.cpp
+    labeling/ray_intersection_opt.cpp \
+    labeling/base_optimizer.cpp
 
 HEADERS  += mainwindow.h \
     base_screen_obstacle.h \
@@ -36,6 +37,7 @@ HEADERS  += mainwindow.h \
     labeling/sim_annealing_opt.h \
     labeling/size.h \
     labeling/utils.h \
-    labeling/ray_intersection_opt.h
+    labeling/ray_intersection_opt.h \
+    labeling/base_optimizer.h
 
 FORMS    += mainwindow.ui
