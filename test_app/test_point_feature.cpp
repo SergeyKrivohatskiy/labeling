@@ -9,11 +9,11 @@ namespace labeling
                                            bool is_fixed,
                                            double /*rotation*/)
         :
-          position(position),
           speed(speed),
+          position(position),
           field_size(field_size),
-          is_fixed(is_fixed),
-          exact_position(position.x, position.y)
+          exact_position(position.x, position.y),
+          is_fixed(is_fixed)
     {
         // TODO rotation
         label_size.h = 40;

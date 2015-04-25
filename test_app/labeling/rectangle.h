@@ -9,7 +9,7 @@ namespace geom2
     struct rectangle
     {
         point<T> left_bottom;
-        size<T> size;
+        size<T> sz;
         T area() const;
         point<T> center() const;
         point<T> left_up() const;
@@ -20,34 +20,34 @@ namespace geom2
     template<class T>
     T rectangle<T>::area() const
     {
-        return size.h * size.w;
+        return sz.h * sz.w;
     }
 
     template<class T>
     point<T> rectangle<T>::center() const
     {
-        return point<T>(left_bottom.x + size.w / 2,
-                        left_bottom.y + size.h / 2);
+        return point<T>(left_bottom.x + sz.w / 2,
+                        left_bottom.y + sz.h / 2);
     }
 
     template<class T>
     point<T> rectangle<T>::left_up() const
     {
         return point<T>(left_bottom.x,
-                        left_bottom.y + size.h);
+                        left_bottom.y + sz.h);
     }
 
     template<class T>
     point<T> rectangle<T>::right_up() const
     {
-        return point<T>(left_bottom.x + size.w,
-                        left_bottom.y + size.h);
+        return point<T>(left_bottom.x + sz.w,
+                        left_bottom.y + sz.h);
     }
 
     template<class T>
     point<T> rectangle<T>::right_bottom() const
     {
-        return point<T>(left_bottom.x + size.w,
+        return point<T>(left_bottom.x + sz.w,
                         left_bottom.y);
     }
 

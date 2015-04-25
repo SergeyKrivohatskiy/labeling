@@ -18,10 +18,9 @@ namespace labeling
         const geom2::rectangle_i * get_box() const;
         const geom2::segment_i * get_segment() const;
     private:
-        type t;
-        // TODO rewrite to union
         geom2::rectangle_i box;
         geom2::segment_i segment;
+        type t;
     };
 
 } // namespace labeling

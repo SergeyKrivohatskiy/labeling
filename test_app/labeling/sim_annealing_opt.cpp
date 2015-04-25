@@ -4,8 +4,7 @@
 #include <random>
 #include <limits>
 #include "utils.h"
-//#define DEBUG
-#ifdef DEBUG
+#ifdef _DEBUG
 #include <QtDebug>
 double METRIC_CHANGE_SUMM = 0;
 double FITS_COUNT = 0;
@@ -253,7 +252,7 @@ namespace labeling
         }
         std::vector<double> metrics = init_metric(state);
 
-#ifdef DEBUG
+#ifdef _DEBUG
         double metric_change = 0;
 #endif
         double t = 1;
@@ -273,14 +272,14 @@ namespace labeling
                     metrics[d_state.first];
             if(d_metric < 0 || do_jump(t, d_metric))
             {
-#ifdef DEBUG
+#ifdef _DEBUG
                 metric_change += d_metric;
 #endif
                 metrics[d_state.first] += d_metric;
                 state[d_state.first] += d_state.second;
             }
-            t = get_new_t(iterations);
             iterations += 1;
+            t = get_new_t(iterations);
             current_time =
                     (duration_cast<milliseconds>(
                          high_resolution_clock::now() - start)).count();
@@ -290,7 +289,7 @@ namespace labeling
 
 
         apply_state(state);
-#ifdef DEBUG
+#ifdef _DEBUG
         METRIC_CHANGE_SUMM += metric_change;
         FITS_COUNT += 1;
         qDebug() << metric_change << " metric_change";

@@ -23,10 +23,10 @@ namespace geom2
     {
         return value_in_range(p.x,
                               r.left_bottom.x,
-                              r.left_bottom.x + r.size.w) &&
+                              r.left_bottom.x + r.sz.w) &&
                value_in_range(p.y,
                               r.left_bottom.y,
-                              r.left_bottom.y + r.size.h);
+                              r.left_bottom.y + r.sz.h);
     }
 
     /*
@@ -38,10 +38,10 @@ namespace geom2
     {
         const T &x_top = std::max(l.left_bottom.x, r.left_bottom.x);
         const T &y_top = std::max(l.left_bottom.y, r.left_bottom.y);
-        const T &x_bot = std::min(l.left_bottom.x + l.size.w,
-                                  r.left_bottom.x + r.size.w);
-        const T &y_bot = std::min(l.left_bottom.y + l.size.h,
-                                  r.left_bottom.y + r.size.h);
+        const T &x_bot = std::min(l.left_bottom.x + l.sz.w,
+                                  r.left_bottom.x + r.sz.w);
+        const T &y_bot = std::min(l.left_bottom.y + l.sz.h,
+                                  r.left_bottom.y + r.sz.h);
         if(x_top >= x_bot || y_top >= y_bot)
         {
             return T();

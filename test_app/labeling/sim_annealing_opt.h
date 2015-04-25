@@ -33,8 +33,7 @@ namespace labeling
         void apply_state(const state_t &state);
         dstate_t update_state(const state_t &state);
         state_t init_state();
-        std::vector<double> sim_annealing_opt::init_metric(
-                const state_t &state);
+        std::vector<double> init_metric(const state_t &state);
     private:
         static bool do_jump(double t, double d_metrics);
         static double get_new_t(int iterations);

@@ -15,7 +15,7 @@ namespace geom2
 
     QRect to_qt(const rectangle_i &r)
     {
-        return QRect(to_qt(r.left_bottom), to_qt(r.size));
+        return QRect(to_qt(r.left_bottom), to_qt(r.sz));
     }
 
     QLine to_qt(const segment_i &s)

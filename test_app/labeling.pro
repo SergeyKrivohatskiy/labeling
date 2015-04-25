@@ -11,6 +11,8 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = labeling
 TEMPLATE = app
 
+CONFIG += c++11
+
 SOURCES += main.cpp\
         mainwindow.cpp \
     base_screen_obstacle.cpp \

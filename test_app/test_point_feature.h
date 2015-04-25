@@ -28,13 +28,13 @@ namespace labeling
 
         void update_position();
     private:
-        geom2::point_i position;
-        geom2::point_d exact_position;
         geom2::point_d speed;
+        geom2::point_i position;
         geom2::size_i field_size;
         geom2::size_i label_size;
         geom2::point_i label_offset;
         prefered_pos_list prefered_positions;
+        geom2::point_d exact_position;
         bool is_fixed;
     };
 } // namespace labeling
