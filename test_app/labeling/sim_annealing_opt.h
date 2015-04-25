@@ -2,7 +2,6 @@
 #define SIM_ANNEALING_OPT_H
 
 #include "positions_optimizer.h"
-#include <set>
 
 namespace labeling
 {

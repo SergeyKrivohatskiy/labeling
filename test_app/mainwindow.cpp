@@ -8,6 +8,7 @@
 #include "labeling/screen_obstacle.h"
 #include "test_point_feature.h"
 #include "labeling/sim_annealing_opt.h"
+#include "labeling/ray_intersection_opt.h"
 #include "geom2_to_qt.h"
 #include "labeling/utils.h"
 
@@ -23,6 +24,7 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
     timer(new QTimer()),
+//    pos_optimizer(new labeling::ray_intersection_opt())
     pos_optimizer(new labeling::sim_annealing_opt())
 {
     ui->setupUi(this);

@@ -79,7 +79,9 @@ namespace geom2
     template<class T>
     bool segments_intersection(const segment<T> &fst_seg,
                                const segment<T> &sec_seg,
-                               point<T> *intersection_point)
+                               point<T> *intersection_point,
+                               double *t_out = nullptr,
+                               double *u_out = nullptr)
     {
         const point<T> &p = fst_seg.start;
         const point<T> &q = sec_seg.start;
@@ -116,6 +118,14 @@ namespace geom2
                     point<T>(static_cast<T>(r.x * t),
                              static_cast<T>(r.y * t));
         }
+        if(t_out != nullptr)
+        {
+            *t_out = t;
+        }
+        if(u_out != nullptr)
+        {
+            *u_out = u;
+        }
         return true;
     }
 
@@ -134,7 +144,9 @@ namespace geom2
     int seg_rect_intersection(const segment<T> &seg,
                                const rectangle<T> &rect,
                               point<T> *intersection_point1,
-                              point<T> *intersection_point2)
+                              point<T> *intersection_point2,
+                              double *t1_out = nullptr,
+                              double *t2_out = nullptr)
     {
         segment<T> rect_seg[4] = {
             {rect.left_bottom,
@@ -147,23 +159,33 @@ namespace geom2
              rect.left_bottom}};
         int intersections = 0;
         point<T> intersection_point;
+        double t;
         for(int i = 0; i < 4; ++i)
         {
-            if(segments_intersection(seg, rect_seg[i], &intersection_point))
+            if(!segments_intersection(seg, rect_seg[i], &intersection_point, &t))
             {
-                intersections += 1;
-                if(intersections == 2)
+                continue;
+            }
+            intersections += 1;
+            if(intersections == 2)
+            {
+                if(intersection_point2 != nullptr)
                 {
-                    if(intersection_point2 != nullptr)
-                    {
-                        *intersection_point2 = intersection_point;
-                    }
-                    return intersections;
+                    *intersection_point2 = intersection_point;
                 }
-                if(intersection_point1 != nullptr)
+                if(t2_out != nullptr)
                 {
-                    *intersection_point1 = intersection_point;
+                    *t2_out = t;
                 }
+                return intersections;
+            }
+            if(intersection_point1 != nullptr)
+            {
+                *intersection_point1 = intersection_point;
+            }
+            if(t1_out != nullptr)
+            {
+                *t1_out = t;
             }
         }
 
@@ -182,6 +204,11 @@ namespace geom2
                                       &intersection_point2);
         if(intersections == 0)
         {
+            if(point_in_rect(seg.start, rect) &&
+                    point_in_rect(seg.end, rect))
+            {
+                return sqr_points_distance(seg.start, seg.end);
+            }
             return T();
         }
 
