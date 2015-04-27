@@ -18,8 +18,8 @@ typedef labeling::screen_point_feature::prefered_pos_list prefered_pos_list;
 
 namespace labeling
 {
-    static const int RAYS_COUNT = 1;
-    static const double RAYS_LENGTH = 1000;
+    static const int RAYS_COUNT = 10;
+    static const double RAYS_LENGTH = 400;
 } // namespace labeling
 
 namespace labeling
@@ -150,7 +150,8 @@ namespace labeling
         for(int i = 0; i < RAYS_COUNT; ++i)
         {
             double deg = 2.0 * M_PI * i / RAYS_COUNT;
-            point_i r(sin(deg) * RAYS_LENGTH, cos(deg) * RAYS_LENGTH);
+            point_i r(static_cast<int>(sin(deg) * RAYS_LENGTH),
+                      static_cast<int>(cos(deg) * RAYS_LENGTH));
             rays.push_back(ray_t{point, point + r});
         }
 
