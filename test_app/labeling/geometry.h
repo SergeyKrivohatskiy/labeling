@@ -143,8 +143,8 @@ namespace geom2
     template<class T>
     int seg_rect_intersection(const segment<T> &seg,
                                const rectangle<T> &rect,
-                              point<T> *intersection_point1,
-                              point<T> *intersection_point2,
+                              point<T> *intersection_point1 = nullptr,
+                              point<T> *intersection_point2 = nullptr,
                               double *t1_out = nullptr,
                               double *t2_out = nullptr)
     {

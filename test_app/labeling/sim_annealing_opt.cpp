@@ -83,8 +83,6 @@ namespace labeling
         auto start = high_resolution_clock::now();
 
         state_t state = init_state();
-        // there is no not fixed points
-        // nothing to optimize
         if(!state.size())
         {
             return;

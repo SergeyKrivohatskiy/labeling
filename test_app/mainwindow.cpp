@@ -24,8 +24,8 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
     timer(new QTimer()),
-//    pos_optimizer(new labeling::ray_intersection_opt())
-    pos_optimizer(new labeling::sim_annealing_opt())
+    pos_optimizer(new labeling::ray_intersection_opt())
+//    pos_optimizer(new labeling::sim_annealing_opt())
 {
     ui->setupUi(this);
 

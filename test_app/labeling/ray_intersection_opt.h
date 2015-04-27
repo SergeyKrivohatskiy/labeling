@@ -2,6 +2,7 @@
 #define RAY_INTERSECTION_OPT_H
 
 #include "positions_optimizer.h"
+#include "base_optimizer.h"
 
 namespace labeling
 {
@@ -9,24 +10,24 @@ namespace labeling
      * Positions optimizer that uses ray intersection algorithm to optimize
      * labels positions
      */
-    class ray_intersection_opt : public positions_optimizer
+    class ray_intersection_opt : public base_optimizer
     {
     public:
         ray_intersection_opt();
         ~ray_intersection_opt();
-        void register_label(screen_point_feature *);
-        void unregister_label(screen_point_feature *);
-
-        void register_obstacle(screen_obstacle *);
-        void unregister_obstacle(screen_obstacle *);
 
         void best_fit(float time_max);
     private:
-        typedef std::vector<screen_point_feature*> points_list_t;
-        typedef std::vector<screen_obstacle*> obstacles_list_t;
+        typedef geom2::segment_i ray_t;
+        typedef std::vector<ray_t> rays_list_t;
     private:
-        points_list_t points_list;
-        obstacles_list_t obstacles_list;
+        bool fit_point(state_t &state, size_t point_idx) const;
+        rays_list_t available_positions(state_t &state,
+                                        size_t point_idx,
+                                        const geom2::point_i &point) const;
+    private:
+        static void intersect_rays(const geom2::rectangle_i & mink_addition,
+                                   rays_list_t &rays);
     };
 } // namespace labeling
 #endif // RAY_INTERSECTION_OPT_H
