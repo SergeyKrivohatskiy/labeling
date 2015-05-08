@@ -225,6 +225,49 @@ namespace geom2
         return sqr_points_distance(intersection_point1, intersection_point2);
     }
 
+    template<class T>
+    T point_seg_sqr_distance(const point<T> &p,
+                             const segment<T> &seg,
+                             point<T> *closest = nullptr)
+    {
+        T seg_sqr_len = sqr_points_distance(seg.start, seg.end);
+        if(seg_sqr_len == T())
+        {
+            if(closest != nullptr)
+            {
+                *closest = seg.start;
+            }
+            return sqr_points_distance(p, seg.start);
+        }
+
+        T t_mul = (p - seg.start).dot(seg.end - seg.start);
+        T t_div = seg_sqr_len;
+        if(t_mul < T())
+        {
+            if(closest != nullptr)
+            {
+                *closest = seg.start;
+            }
+            return sqr_points_distance(p, seg.start);
+        } else {
+            if(t_mul > t_div)
+            {
+                if(closest != nullptr)
+                {
+                    *closest = seg.end;
+                }
+                return sqr_points_distance(p, seg.end);
+            }
+        }
+        const point<T> projection = seg.start +
+                (seg.end - seg.start) * t_mul / t_div;
+        if(closest != nullptr)
+        {
+            *closest = projection;
+        }
+        return sqr_points_distance(p, projection);
+    }
+
 } // namespace geom2
 
 

@@ -18,8 +18,9 @@ typedef labeling::screen_point_feature::prefered_pos_list prefered_pos_list;
 
 namespace labeling
 {
-    static const int RAYS_COUNT = 10;
-    static const double RAYS_LENGTH = 400;
+    static const int RAYS_COUNT = 12;
+    static const int RAYS_LENGTH = 3;
+    static const int MAX_DISTANCE_FROM_PREF = 10 * 10;
 } // namespace labeling
 
 namespace labeling
@@ -190,32 +191,49 @@ namespace labeling
     {
         const screen_point_feature *point = points_list[point_idx];
 
-        point_i old_pos =
+        point_i cur_pos =
                 point->get_screen_pivot() +
-                point->get_prefered_positions()[0].second;
+                point->get_label_offset();
         rays_list_t rays =
-                available_positions(state, point_idx, old_pos);
+                available_positions(state, point_idx, cur_pos);
 
-        if(rays.empty())
-        {
-            // Cant place label
-            return false;
-        }
-
+        point_i best_pos = point->get_prefered_positions()[0].second +
+                point->get_screen_pivot();
         int min_sqr_distance = std::numeric_limits<int>::max();
         point_i where_min;
         for(const ray_t &ray: rays)
         {
-            int distance = sqr_points_distance(old_pos, ray.start);
+            point_i closest;
+            int distance = point_seg_sqr_distance(best_pos, ray, &closest);
             if(distance < min_sqr_distance)
             {
                 min_sqr_distance = distance;
-                where_min = ray.start;
+                where_min = closest;
             }
         }
 
         point_i old_state = state[point_idx];
-        state[point_idx] = where_min - point->get_screen_pivot();
+
+        if(rays.empty() || min_sqr_distance > MAX_DISTANCE_FROM_PREF)
+        {
+            // Move to closest(in tersms of weights) prefered position
+            point_i to_best = best_pos - cur_pos;
+            double norm = to_best.norm();
+            if(norm == 0)
+            {
+                return false;
+            }
+            if(norm > RAYS_LENGTH)
+            {
+                state[point_idx] = cur_pos + to_best * RAYS_LENGTH /
+                        static_cast<int>(norm) - point->get_screen_pivot();
+            } else {
+                state[point_idx] = best_pos - point->get_screen_pivot();
+            }
+        } else {
+            state[point_idx] = where_min - point->get_screen_pivot();
+        }
+
 
         return old_state.x != state[point_idx].x ||
                 old_state.y != state[point_idx].y;

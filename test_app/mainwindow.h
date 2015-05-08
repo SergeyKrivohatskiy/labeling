@@ -8,7 +8,7 @@
 #include "labeling/positions_optimizer.h"
 
 const int UPDATE_TIME_MS = 50;
-const float TIME_TO_OPTIMIZE = 4;
+const float TIME_TO_OPTIMIZE = 40;
 const double MAX_POINT_SPEED = 0.5;
 const double MAX_POINT_ROT = 2 * 3.14 / 360 * 1;
 const double FIXED_POINT_P = 0.1;
