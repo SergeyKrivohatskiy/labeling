@@ -1,0 +1,6 @@
+language: cpp
+path: test_app
+ignored:
+    - labeling.pro.user
+    - labeling.pro
+    - mainwindow.ui
