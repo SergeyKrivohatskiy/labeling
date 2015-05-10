@@ -20,14 +20,8 @@ namespace labeling
         typedef std::vector<geom2::point_i> state_t;
         typedef std::vector<screen_obstacle*> obstacles_list_t;
     protected:
-        double calc_metric(const state_t &state, size_t i,
-                           const geom2::point_i &new_offset) const;
         void apply_state(const state_t &state);
         state_t init_state();
-        std::vector<double> init_metric(const state_t &state);
-    private:
-        static double point_to_points_metric(const geom2::point_i &point,
-                      const screen_point_feature::prefered_pos_list &points);
     protected:
         points_list_t points_list;
         obstacles_list_t obstacles_list;
