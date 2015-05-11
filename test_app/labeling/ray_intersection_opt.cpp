@@ -18,9 +18,8 @@ typedef labeling::screen_point_feature::prefered_pos_list prefered_pos_list;
 
 namespace labeling
 {
-    static const int RAYS_COUNT = 12;
-    static const int RAYS_LENGTH = 3;
-    static const int MAX_DISTANCE_FROM_PREF = 10 * 10;
+    static const int RAYS_COUNT = 8;
+    static const int RAYS_LENGTH = 50;
 } // namespace labeling
 
 namespace labeling
@@ -31,52 +30,120 @@ namespace labeling
     ray_intersection_opt::~ray_intersection_opt()
     {}
 
-    void ray_intersection_opt::best_fit(float time_max)
+    void ray_intersection_opt::find_best_ray(
+            const std::vector<rays_list_t> &points_rays,
+            size_t in_process_count,
+            size_t &idx_max_min,
+            point_i &best_pos)
     {
-        auto start = high_resolution_clock::now();
-        state_t state = init_state();
-        if(!state.size())
+        double max_min_available_space = 0;
+        for(size_t idx = 0; idx < points_rays.size(); ++idx)
         {
-            return;
+            const rays_list_t &rays = points_rays[idx];
+            int min_sqr_distance = std::numeric_limits<int>::max();
+            point_i where_min;
+            for(const ray_t &ray: rays)
+            {
+                point_i closest;
+                int distance =
+                        point_seg_sqr_distance(points_list[idx]->get_prefered_positions()[0].second +
+                        points_list[idx]->get_screen_pivot(), ray, &closest);
+                if(distance < min_sqr_distance)
+                {
+                    min_sqr_distance = distance;
+                    where_min = closest;
+                }
+            }
+            points_list[idx]->set_label_offset(
+                        where_min - points_list[idx]->get_screen_pivot());
+
+            std::vector<rays_list_t> new_points_rays =
+                    get_points_rays(in_process_count);
+
+            double min_available_space = std::numeric_limits<double>::max();
+            for(const rays_list_t &rays: new_points_rays)
+            {
+                double available_space = 0;
+                for(const ray_t &ray: rays)
+                {
+                    // TODO change to integral e^(-dist)
+                    available_space += points_distance(ray.start, ray.end);
+                }
+                if(available_space < min_available_space)
+                {
+                    min_available_space = available_space;
+                }
+            }
+
+            if(min_available_space > max_min_available_space)
+            {
+                max_min_available_space = min_available_space;
+                idx_max_min = idx;
+                best_pos = where_min;
+            }
+        }
+    }
+
+    std::vector<ray_intersection_opt::rays_list_t>
+        ray_intersection_opt::get_points_rays(size_t points_to_locate)
+    {
+        std::vector<rays_list_t> points_rays(points_to_locate);
+        for(size_t idx = 0; idx < points_to_locate; ++idx)
+        {
+            points_rays[idx] =
+                    available_positions(idx,
+                                        points_list[idx]->get_screen_pivot() +
+                                        points_list[idx]->get_label_offset());
+        }
+
+        for(size_t idx = 0; idx < points_to_locate;)
+        {
+            if (!points_rays[idx].size())
+            {
+                points_to_locate -= 1;
+                points_rays[idx] = std::move(points_rays[points_to_locate]);
+                points_rays.erase(points_rays.end() - 1);
+                std::swap(points_list[idx], points_list[points_to_locate]);
+            } else {
+                idx += 1;
+            }
+        }
+        points_rays.resize(points_to_locate);
+        return points_rays;
+    }
+
+    void ray_intersection_opt::best_fit(float /*time_max*/)
+    {
+        auto fixed_begin = move_fixed_to_end();
+        size_t in_process_count = fixed_begin - points_list.begin();
+
+        while(in_process_count)
+        {
+            std::vector<rays_list_t> points_rays =
+                    get_points_rays(in_process_count);
+
+            if(points_rays.empty())
+            {
+                break;
+            }
+
+            size_t idx;
+            point_i best_pos;
+            find_best_ray(points_rays, in_process_count, idx, best_pos);
+
+            points_list[idx]->set_label_offset(
+                        best_pos - points_list[idx]->get_screen_pivot());
+            in_process_count -= 1;
+            std::swap(points_list[idx], points_list[in_process_count]);
         }
 
 #ifdef _DEBUG
-        int changed_count = 0;
-#endif
-        int iterations = 0;
-        int64_t current_time;
-        size_t current_idx = 0;
-        bool changed = false;
-        do
-        {
-            bool current_changed = fit_point(state, current_idx);
-            changed |= current_changed;
-#ifdef _DEBUG
-            changed_count += current_changed ? 1 : 0;
+//        in_process_count - amount of points that is not located
+        qDebug() << "labeled: " <<
+                    1.0 - in_process_count /
+                    (double)(fixed_begin - points_list.begin());
 #endif
 
-            current_idx += 1;
-            iterations += 1;
-            if(current_idx == state.size())
-            {
-                if(!changed)
-                {
-                    break;
-                }
-                current_idx = 0;
-            }
-            current_time =
-                    (duration_cast<milliseconds>(
-                         high_resolution_clock::now() - start)).count();
-        } while(current_time < time_max);
-
-        apply_state(state);
-#ifdef _DEBUG
-        qDebug() << ((double)changed_count / iterations) << "changed_ratio";
-        qDebug() << iterations << "iterations";
-        qDebug() << ((double)iterations / state.size())
-                 << "avg iterations per point";
-#endif
     }
 
     void ray_intersection_opt::intersect_rays(const rectangle_i & mink_addition,
@@ -143,7 +210,7 @@ namespace labeling
     }
 
     ray_intersection_opt::rays_list_t ray_intersection_opt::available_positions(
-            state_t &state, size_t point_idx, const point_i &point) const
+            size_t point_idx, const point_i &point) const
     {
         const size_i &label_size = points_list[point_idx]->get_label_size();
 
@@ -156,7 +223,7 @@ namespace labeling
             rays.push_back(ray_t{point, point + r});
         }
 
-        for(size_t j = 0; j < state.size(); ++j)
+        for(size_t j = 0; j < points_list.size(); ++j)
         {
             // remove segments from ray for label positions that
             // intersects with other labels
@@ -166,77 +233,13 @@ namespace labeling
                 continue;
             }
             rectangle_i mink_addition =
-                {state[j] + points_list[j]->get_screen_pivot() - label_size,
-                 points_list[j]->get_label_size() + label_size};
-            intersect_rays(mink_addition, rays);
-        }
-        for(size_t j = state.size(); j < points_list.size(); ++j)
-        {
-            rectangle_i mink_addition =
-                {points_list[j]->get_label_offset() +
-                 points_list[j]->get_screen_pivot() - label_size,
+                {points_list[j]->get_screen_pivot() +
+                 points_list[j]->get_label_offset() - label_size,
                  points_list[j]->get_label_size() + label_size};
             intersect_rays(mink_addition, rays);
         }
 
         return rays;
-    }
-
-    /*
-     * Changes the position of specified by idx point using ray intersection
-     * algorithm
-     * @return true if state[point_idx] was changed
-     */
-    bool ray_intersection_opt::fit_point(state_t &state, size_t point_idx) const
-    {
-        const screen_point_feature *point = points_list[point_idx];
-
-        point_i cur_pos =
-                point->get_screen_pivot() +
-                point->get_label_offset();
-        rays_list_t rays =
-                available_positions(state, point_idx, cur_pos);
-
-        point_i best_pos = point->get_prefered_positions()[0].second +
-                point->get_screen_pivot();
-        int min_sqr_distance = std::numeric_limits<int>::max();
-        point_i where_min;
-        for(const ray_t &ray: rays)
-        {
-            point_i closest;
-            int distance = point_seg_sqr_distance(best_pos, ray, &closest);
-            if(distance < min_sqr_distance)
-            {
-                min_sqr_distance = distance;
-                where_min = closest;
-            }
-        }
-
-        point_i old_state = state[point_idx];
-
-        if(rays.empty() || min_sqr_distance > MAX_DISTANCE_FROM_PREF)
-        {
-            // Move to closest(in tersms of weights) prefered position
-            point_i to_best = best_pos - cur_pos;
-            double norm = to_best.norm();
-            if(norm == 0)
-            {
-                return false;
-            }
-            if(norm > RAYS_LENGTH)
-            {
-                state[point_idx] = cur_pos + to_best * RAYS_LENGTH /
-                        static_cast<int>(norm) - point->get_screen_pivot();
-            } else {
-                state[point_idx] = best_pos - point->get_screen_pivot();
-            }
-        } else {
-            state[point_idx] = where_min - point->get_screen_pivot();
-        }
-
-
-        return old_state.x != state[point_idx].x ||
-                old_state.y != state[point_idx].y;
     }
 
 } // namespace labeling

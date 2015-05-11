@@ -44,10 +44,8 @@ namespace labeling
         obstacles_list.erase(pos);
     }
 
-
-    base_optimizer::state_t base_optimizer::init_state()
+    base_optimizer::points_list_t::iterator base_optimizer::move_fixed_to_end()
     {
-        state_t state;
         auto fixed_beg = points_list.begin();
         // Move point with fixed labels to the end
         for(auto it = points_list.begin(); it != points_list.end(); ++it)
@@ -59,7 +57,14 @@ namespace labeling
                 ++fixed_beg;
             }
         }
+        return fixed_beg;
+    }
 
+
+    base_optimizer::state_t base_optimizer::init_state()
+    {
+        state_t state;
+        auto fixed_beg = move_fixed_to_end();
         state.reserve(fixed_beg - points_list.begin());
         for(auto it = points_list.begin(); it != fixed_beg; ++it)
         {

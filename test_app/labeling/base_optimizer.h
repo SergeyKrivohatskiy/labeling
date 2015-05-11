@@ -22,6 +22,7 @@ namespace labeling
     protected:
         void apply_state(const state_t &state);
         state_t init_state();
+        points_list_t::iterator move_fixed_to_end();
     protected:
         points_list_t points_list;
         obstacles_list_t obstacles_list;
