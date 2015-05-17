@@ -16,6 +16,8 @@ namespace geom2
         point operator-(const point &other) const;
         T operator*(const point &other) const;
         T dot(const point &other) const;
+        template<class U>
+        explicit operator point<U>() const;
         point operator*(const T &v) const;
         point operator/(const T &v) const;
         point& operator+=(const point &other);
@@ -39,6 +41,13 @@ namespace geom2
           x(x),
           y(y)
     {
+    }
+
+    template<class T>
+    template<class U>
+    point<T>::operator point<U>() const
+    {
+        return point<U>(static_cast<U>(x), static_cast<U>(y));
     }
 
     template<class T>

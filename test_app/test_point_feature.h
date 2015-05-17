@@ -34,8 +34,13 @@ namespace labeling
         geom2::size_i label_size;
         geom2::point_i label_offset;
         prefered_pos_list prefered_positions;
+        prefered_pos_list rotated_prefered_positions;
         geom2::point_d exact_position;
         bool is_fixed;
+        bool offset_changed;
+        geom2::point_d exact_offset;
+        double rotation;
+        double cur_rotation;
     };
 } // namespace labeling
 

@@ -19,7 +19,7 @@ typedef labeling::screen_point_feature::prefered_pos_list prefered_pos_list;
 namespace labeling
 {
     static const int RAYS_COUNT = 8;
-    static const int RAYS_LENGTH = 50;
+    static const int RAYS_LENGTH = 10;
 } // namespace labeling
 
 namespace labeling
@@ -42,6 +42,7 @@ namespace labeling
             const rays_list_t &rays = points_rays[idx];
             int min_sqr_distance = std::numeric_limits<int>::max();
             point_i where_min;
+            point_i old_offset = points_list[idx]->get_label_offset();
             for(const ray_t &ray: rays)
             {
                 point_i closest;
@@ -81,6 +82,7 @@ namespace labeling
                 idx_max_min = idx;
                 best_pos = where_min;
             }
+            points_list[idx]->set_label_offset(old_offset);
         }
     }
 

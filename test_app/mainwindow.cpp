@@ -149,11 +149,6 @@ void MainWindow::paintEvent(QPaintEvent *)
     }
 }
 
-namespace details
-{
-
-}
-
 void MainWindow::mousePressEvent(QMouseEvent *event)
 {
     //    Left button on label make it fixed
@@ -183,13 +178,6 @@ void MainWindow::mousePressEvent(QMouseEvent *event)
             }
         }
         add_point(pos);
-        return;
-    }
-    //    Right button on obstacle removes it
-    //    Right button on empty space adds new obstacle
-    if(event->button() == Qt::RightButton)
-    {
-        // TODO
         return;
     }
     QMainWindow::mousePressEvent(event);

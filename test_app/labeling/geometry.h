@@ -268,6 +268,15 @@ namespace geom2
         return sqr_points_distance(p, projection);
     }
 
+    template<class T>
+    point_d rotate(const point<T> &p, double rotation)
+    {
+        return point_d(p.x * cos(rotation) +
+                       p.y * sin(rotation),
+                       p.y * cos(rotation) -
+                       p.x * sin(rotation));
+    }
+
 } // namespace geom2
 
 
