@@ -122,7 +122,9 @@ void MainWindow::paintEvent(QPaintEvent *)
 
     for(auto &point_u_ptr: screen_points)
     {
-        screen_point_feature *point = point_u_ptr.get();
+        test_point_feature *point =
+                static_cast<test_point_feature*>(point_u_ptr.get());
+
         auto point_color = point->is_label_fixed() ? Qt::darkCyan : Qt::blue;
         painter.setPen(QPen(point_color, 10));
         painter.drawPoint(to_qt(point->get_screen_pivot()));
@@ -146,6 +148,11 @@ void MainWindow::paintEvent(QPaintEvent *)
         painter.setPen(QPen(point_color, 3));
         painter.drawRect(QRect(label_left_bottom,
                                to_qt(point->get_label_size())));
+        painter.setPen(QPen(Qt::red, 1));
+        for(const point_i &track_point: point->get_track())
+        {
+            painter.drawPoint(to_qt(track_point));
+        }
     }
 }
 

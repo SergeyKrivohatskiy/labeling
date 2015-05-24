@@ -3,6 +3,8 @@
 using namespace geom2;
 namespace labeling
 {
+    const size_t TRACK_LEN = 200;
+
     test_point_feature::test_point_feature(const geom2::point_i &position,
                                            const geom2::point_d &speed,
                                            const geom2::size_i &field_size,
@@ -16,12 +18,13 @@ namespace labeling
           is_fixed(is_fixed),
           rotation(rotation),
           cur_rotation(0.0),
-          offset_changed(false)
+          offset_changed(false),
+          label_offset(40, 40),
+          exact_offset(static_cast<point_d>(label_offset)),
+          track(TRACK_LEN, position)
     {
         label_size.h = 40;
         label_size.w = 100;
-        label_offset.x = label_offset.y = 40;
-        exact_offset = static_cast<point_d>(label_offset);
         prefered_positions.push_back(prefered_position(1.0, label_offset));
         prefered_positions.push_back(prefered_position(1.0, point_i{-40, 40}));
         prefered_positions.push_back(prefered_position(0.3, point_i{40, -40}));
@@ -66,8 +69,15 @@ namespace labeling
         is_fixed = fixed;
     }
 
+    const std::deque<geom2::point_i>& test_point_feature::get_track() const
+    {
+        return track;
+    }
+
     void test_point_feature::update_position()
     {
+        track.pop_back();
+        track.push_front(position);
         cur_rotation += rotation;
         point_d rotated_speed = rotate(speed, cur_rotation);
         if(offset_changed)

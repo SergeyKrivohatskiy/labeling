@@ -1,6 +1,7 @@
 #ifndef TEST_POINT_FEATURE_H
 #define TEST_POINT_FEATURE_H
 
+#include <deque>
 #include "labeling/screen_point_feature.h"
 
 namespace labeling
@@ -27,7 +28,9 @@ namespace labeling
         const prefered_pos_list& get_prefered_positions() const;
 
         void update_position();
+        const std::deque<geom2::point_i>& get_track() const;
     private:
+        std::deque<geom2::point_i> track;
         geom2::point_d speed;
         geom2::point_i position;
         geom2::size_i field_size;
