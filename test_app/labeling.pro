@@ -21,7 +21,8 @@ SOURCES += main.cpp\
     labeling/sim_annealing_opt.cpp \
     labeling/utils.cpp \
     labeling/ray_intersection_opt.cpp \
-    labeling/base_optimizer.cpp
+    labeling/base_optimizer.cpp \
+    labeling/geometry.cpp
 
 HEADERS  += mainwindow.h \
     base_screen_obstacle.h \

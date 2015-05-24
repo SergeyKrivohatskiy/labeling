@@ -140,57 +140,12 @@ namespace geom2
      * intersection_point2 is not NULL
      * @return number of intersection points found(from 0 to 2)
      */
-    template<class T>
-    int seg_rect_intersection(const segment<T> &seg,
-                               const rectangle<T> &rect,
-                              point<T> *intersection_point1 = nullptr,
-                              point<T> *intersection_point2 = nullptr,
+    int seg_rect_intersection(const segment_i &seg,
+                              const rectangle_i &rect,
+                              point_i *intersection_point1 = nullptr,
+                              point_i *intersection_point2 = nullptr,
                               double *t1_out = nullptr,
-                              double *t2_out = nullptr)
-    {
-        segment<T> rect_seg[4] = {
-            {rect.left_bottom,
-             rect.right_bottom()},
-            {rect.right_bottom(),
-             rect.right_up()},
-            {rect.right_up(),
-             rect.left_up()},
-            {rect.left_up(),
-             rect.left_bottom}};
-        int intersections = 0;
-        point<T> intersection_point;
-        double t;
-        for(int i = 0; i < 4; ++i)
-        {
-            if(!segments_intersection(seg, rect_seg[i], &intersection_point, &t))
-            {
-                continue;
-            }
-            intersections += 1;
-            if(intersections == 2)
-            {
-                if(intersection_point2 != nullptr)
-                {
-                    *intersection_point2 = intersection_point;
-                }
-                if(t2_out != nullptr)
-                {
-                    *t2_out = t;
-                }
-                return intersections;
-            }
-            if(intersection_point1 != nullptr)
-            {
-                *intersection_point1 = intersection_point;
-            }
-            if(t1_out != nullptr)
-            {
-                *t1_out = t;
-            }
-        }
-
-        return intersections;
-    }
+                              double *t2_out = nullptr);
 
     template<class T>
     T get_sqr_seg_rect_intersection(const segment<T> &seg,
