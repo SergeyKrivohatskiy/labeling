@@ -6,6 +6,7 @@
 #include <math.h>
 #ifdef _DEBUG
 #include <QtDebug>
+#include <assert.h>
 #endif
 
 using namespace geom2;
@@ -36,7 +37,7 @@ namespace labeling
             size_t &idx_max_min,
             point_i &best_pos)
     {
-        double max_min_available_space = 0;
+        double max_min_available_space = -1;
         for(size_t idx = 0; idx < points_rays.size(); ++idx)
         {
             const rays_list_t &rays = points_rays[idx];
@@ -97,20 +98,6 @@ namespace labeling
                                         points_list[idx]->get_screen_pivot() +
                                         points_list[idx]->get_label_offset());
         }
-
-        for(size_t idx = 0; idx < points_to_locate;)
-        {
-            if (!points_rays[idx].size())
-            {
-                points_to_locate -= 1;
-                points_rays[idx] = std::move(points_rays[points_to_locate]);
-                points_rays.erase(points_rays.end() - 1);
-                std::swap(points_list[idx], points_list[points_to_locate]);
-            } else {
-                idx += 1;
-            }
-        }
-        points_rays.resize(points_to_locate);
         return points_rays;
     }
 
@@ -123,6 +110,22 @@ namespace labeling
         {
             std::vector<rays_list_t> points_rays =
                     get_points_rays(in_process_count);
+            size_t points_to_locate = in_process_count;
+            for(size_t idx = 0; idx < points_to_locate;)
+            {
+                if (points_rays[idx].empty())
+                {
+                    points_to_locate -= 1;
+                    points_rays[idx] = std::move(points_rays[points_to_locate]);
+                    points_rays.erase(points_rays.end() - 1);
+                    auto tmp = points_list[idx];
+                    points_list[idx] = points_list[points_to_locate];
+                    points_list[points_to_locate] = tmp;
+                } else {
+                    idx += 1;
+                }
+            }
+            points_rays.resize(points_to_locate);
 
             if(points_rays.empty())
             {
@@ -133,10 +136,12 @@ namespace labeling
             point_i best_pos;
             find_best_ray(points_rays, in_process_count, idx, best_pos);
 
-            points_list[idx]->set_label_offset(
-                        best_pos - points_list[idx]->get_screen_pivot());
+            point_i new_offset = best_pos - points_list[idx]->get_screen_pivot();
+            points_list[idx]->set_label_offset(new_offset);
             in_process_count -= 1;
-            std::swap(points_list[idx], points_list[in_process_count]);
+            auto tmp = points_list[idx];
+            points_list[idx] = points_list[in_process_count];
+            points_list[in_process_count] = tmp;
         }
 
 #ifdef _DEBUG
@@ -240,6 +245,7 @@ namespace labeling
                  points_list[j]->get_label_size() + label_size};
             intersect_rays(mink_addition, rays);
         }
+
 
         return rays;
     }
