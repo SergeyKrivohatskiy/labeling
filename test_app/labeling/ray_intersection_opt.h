@@ -22,7 +22,8 @@ namespace labeling
         typedef std::vector<ray_t> rays_list_t;
     private:
         rays_list_t ray_intersection_opt::init_rays(
-                const geom2::point_i &point) const;
+                const screen_point_feature *point) const;
+        geom2::point_i rays_to_best_pos(size_t idx, const rays_list_t &rays);
         std::vector<rays_list_t> get_points_rays(size_t points_to_locate);
         bool fit_point(state_t &state, size_t point_idx) const;
         void find_best_ray(
@@ -30,8 +31,7 @@ namespace labeling
                     size_t in_process_count,
                     size_t &idx,
                     geom2::point_i &best_pos);
-        rays_list_t available_positions(size_t point_idx,
-                                        const geom2::point_i &point) const;
+        rays_list_t available_positions(size_t point_idx) const;
     private:
         static void intersect_rays(const geom2::rectangle_i & mink_addition,
                                    rays_list_t &rays);

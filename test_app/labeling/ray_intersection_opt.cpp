@@ -21,7 +21,8 @@ typedef labeling::screen_point_feature::prefered_pos_list prefered_pos_list;
 namespace labeling
 {
     static const int RAYS_COUNT = 8;
-    static const int RAYS_LENGTH = 10;
+    static const int RAYS_LENGTH = 14;
+    static const int SQR_MAX_DIST_FROM_BEST = 100*100;
 } // namespace labeling
 
 namespace labeling
@@ -31,6 +32,27 @@ namespace labeling
 
     ray_intersection_opt::~ray_intersection_opt()
     {}
+
+    point_i ray_intersection_opt::rays_to_best_pos(size_t idx, const rays_list_t &rays)
+    {
+        point_i where_min;
+        int min_sqr_distance = std::numeric_limits<int>::max();
+        for(const ray_t &ray: rays)
+        {
+            point_i closest;
+            int distance =
+                    point_seg_sqr_distance(
+                        points_list[idx]->get_prefered_positions()[0].second +
+                    points_list[idx]->get_screen_pivot(), ray, &closest);
+            if(distance < min_sqr_distance)
+            {
+                min_sqr_distance = distance;
+                where_min = closest;
+            }
+        }
+
+        return where_min;
+    }
 
     void ray_intersection_opt::find_best_ray(
             const std::vector<rays_list_t> &points_rays,
@@ -42,22 +64,8 @@ namespace labeling
         for(size_t idx = 0; idx < points_rays.size(); ++idx)
         {
             const rays_list_t &rays = points_rays[idx];
-            int min_sqr_distance = std::numeric_limits<int>::max();
-            point_i where_min;
             point_i old_offset = points_list[idx]->get_label_offset();
-            for(const ray_t &ray: rays)
-            {
-                point_i closest;
-                int distance =
-                        point_seg_sqr_distance(
-                            points_list[idx]->get_prefered_positions()[0].second +
-                        points_list[idx]->get_screen_pivot(), ray, &closest);
-                if(distance < min_sqr_distance)
-                {
-                    min_sqr_distance = distance;
-                    where_min = closest;
-                }
-            }
+            point_i where_min = rays_to_best_pos(idx, rays);
             points_list[idx]->set_label_offset(
                         where_min - points_list[idx]->get_screen_pivot());
 
@@ -96,9 +104,7 @@ namespace labeling
         for(size_t idx = 0; idx < points_to_locate; ++idx)
         {
             points_rays[idx] =
-                    available_positions(idx,
-                                        points_list[idx]->get_screen_pivot() +
-                                        points_list[idx]->get_label_offset());
+                    available_positions(idx);
         }
         return points_rays;
     }
@@ -141,6 +147,8 @@ namespace labeling
             in_process_count -= 1;
             swap(points_list[idx], points_list[in_process_count]);
         }
+
+
 
 #ifdef _DEBUG
 //        in_process_count - amount of points that is not located
@@ -215,26 +223,33 @@ namespace labeling
     }
 
     ray_intersection_opt::rays_list_t ray_intersection_opt::init_rays(
-            const point_i &point) const
+            const screen_point_feature *point) const
     {
+        point_i cur_pos = point->get_label_offset() + point->get_screen_pivot();
+        point_i best_pos = point->get_screen_pivot() +
+                point->get_prefered_positions()[0].second;
         rays_list_t rays;
         for(int i = 0; i < RAYS_COUNT; ++i)
         {
             double deg = 2.0 * M_PI * i / RAYS_COUNT;
             point_i r(static_cast<int>(sin(deg) * RAYS_LENGTH),
                       static_cast<int>(cos(deg) * RAYS_LENGTH));
-            rays.push_back(ray_t{point, point + r});
+            point_i end = cur_pos + r;
+            if(sqr_points_distance(end, best_pos) <= SQR_MAX_DIST_FROM_BEST)
+            {
+                rays.push_back(ray_t{cur_pos, end});
+            }
         }
         return rays;
     }
 
     ray_intersection_opt::rays_list_t ray_intersection_opt::available_positions(
-            size_t point_idx, const point_i &point) const
+            size_t point_idx) const
     {
+
+        rays_list_t rays = init_rays(points_list[point_idx]);
+
         const size_i &label_size = points_list[point_idx]->get_label_size();
-
-        rays_list_t rays = init_rays(point);
-
         for(size_t j = 0; j < points_list.size(); ++j)
         {
             // remove segments from ray for label positions that

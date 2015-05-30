@@ -8,12 +8,12 @@
 #include "labeling/positions_optimizer.h"
 
 const int UPDATE_TIME_MS = 100;
-const float TIME_TO_OPTIMIZE = 5;
+const float TIME_TO_OPTIMIZE = 80;
 const double MAX_POINT_SPEED = 0.7;
 const double MAX_POINT_ROT = 2 * 3.14 / 360 * 0.2;
 const double FIXED_POINT_P = 0;
-const int INIT_POINTS_COUNT = 50;
-const int INIT_OBSTACLES_COUNT = 10;
+const int INIT_POINTS_COUNT = 25;
+const int INIT_OBSTACLES_COUNT = 0;
 
 namespace Ui {
 class MainWindow;
