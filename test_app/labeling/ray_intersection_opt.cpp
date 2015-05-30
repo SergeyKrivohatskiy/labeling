@@ -13,6 +13,7 @@ using namespace geom2;
 using std::chrono::high_resolution_clock;
 using std::chrono::milliseconds;
 using std::chrono::duration_cast;
+using std::swap;
 //TODO find out is it ok to do typedef's like this?
 typedef labeling::screen_point_feature::prefered_position prefered_position;
 typedef labeling::screen_point_feature::prefered_pos_list prefered_pos_list;
@@ -48,7 +49,8 @@ namespace labeling
             {
                 point_i closest;
                 int distance =
-                        point_seg_sqr_distance(points_list[idx]->get_prefered_positions()[0].second +
+                        point_seg_sqr_distance(
+                            points_list[idx]->get_prefered_positions()[0].second +
                         points_list[idx]->get_screen_pivot(), ray, &closest);
                 if(distance < min_sqr_distance)
                 {
@@ -118,9 +120,7 @@ namespace labeling
                     points_to_locate -= 1;
                     points_rays[idx] = std::move(points_rays[points_to_locate]);
                     points_rays.erase(points_rays.end() - 1);
-                    auto tmp = points_list[idx];
-                    points_list[idx] = points_list[points_to_locate];
-                    points_list[points_to_locate] = tmp;
+                    swap(points_list[idx], points_list[points_to_locate]);
                 } else {
                     idx += 1;
                 }
@@ -139,9 +139,7 @@ namespace labeling
             point_i new_offset = best_pos - points_list[idx]->get_screen_pivot();
             points_list[idx]->set_label_offset(new_offset);
             in_process_count -= 1;
-            auto tmp = points_list[idx];
-            points_list[idx] = points_list[in_process_count];
-            points_list[in_process_count] = tmp;
+            swap(points_list[idx], points_list[in_process_count]);
         }
 
 #ifdef _DEBUG
@@ -216,11 +214,9 @@ namespace labeling
         rays = std::move(available);
     }
 
-    ray_intersection_opt::rays_list_t ray_intersection_opt::available_positions(
-            size_t point_idx, const point_i &point) const
+    ray_intersection_opt::rays_list_t ray_intersection_opt::init_rays(
+            const point_i &point) const
     {
-        const size_i &label_size = points_list[point_idx]->get_label_size();
-
         rays_list_t rays;
         for(int i = 0; i < RAYS_COUNT; ++i)
         {
@@ -229,12 +225,20 @@ namespace labeling
                       static_cast<int>(cos(deg) * RAYS_LENGTH));
             rays.push_back(ray_t{point, point + r});
         }
+        return rays;
+    }
+
+    ray_intersection_opt::rays_list_t ray_intersection_opt::available_positions(
+            size_t point_idx, const point_i &point) const
+    {
+        const size_i &label_size = points_list[point_idx]->get_label_size();
+
+        rays_list_t rays = init_rays(point);
 
         for(size_t j = 0; j < points_list.size(); ++j)
         {
             // remove segments from ray for label positions that
             // intersects with other labels
-
             if(point_idx == j)
             {
                 continue;

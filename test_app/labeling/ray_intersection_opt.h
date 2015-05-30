@@ -21,6 +21,8 @@ namespace labeling
         typedef geom2::segment_i ray_t;
         typedef std::vector<ray_t> rays_list_t;
     private:
+        rays_list_t ray_intersection_opt::init_rays(
+                const geom2::point_i &point) const;
         std::vector<rays_list_t> get_points_rays(size_t points_to_locate);
         bool fit_point(state_t &state, size_t point_idx) const;
         void find_best_ray(
