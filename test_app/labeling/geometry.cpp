@@ -75,6 +75,26 @@ namespace geom2
                     y = y0 + static_cast<int>((y1 - y0) * t);
                     x = xmin;
                 }
+
+                // Now we move outside point to intersection point to clip
+                // and get ready for next pass.
+                if (outcodeOut == outcode0) {
+                    x0 = x;
+                    y0 = y;
+                    outcode0 = out_code(x0, y0, xmin, xmax, ymin, ymax);
+                    if(outcode0)
+                    {
+                        continue;
+                    }
+                } else {
+                    x1 = x;
+                    y1 = y;
+                    outcode1 = out_code(x1, y1, xmin, xmax, ymin, ymax);
+                    if(outcode1)
+                    {
+                        continue;
+                    }
+                }
                 intersections += 1;
 
                 if(intersections == 1)
@@ -98,18 +118,6 @@ namespace geom2
                         intersection_point2->x = x;
                         intersection_point2->y = y;
                     }
-                }
-
-                // Now we move outside point to intersection point to clip
-                // and get ready for next pass.
-                if (outcodeOut == outcode0) {
-                    x0 = x;
-                    y0 = y;
-                    outcode0 = out_code(x0, y0, xmin, xmax, ymin, ymax);
-                } else {
-                    x1 = x;
-                    y1 = y;
-                    outcode1 = out_code(x1, y1, xmin, xmax, ymin, ymax);
                 }
             }
         }

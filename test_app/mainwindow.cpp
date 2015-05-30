@@ -47,7 +47,8 @@ void MainWindow::add_point(const point_i &pos)
                                             speed,
                                             field_size,
                                             rand() * to_0_1 < FIXED_POINT_P,
-                                            rand() * to_0_1 * MAX_POINT_ROT);
+                                            rand() * to_0_1 * 2 * MAX_POINT_ROT
+                                            - MAX_POINT_ROT);
     screen_points.push_back(
                 unique_ptr<screen_point_feature>(new_point));
     pos_optimizer->register_label(new_point);
@@ -143,6 +144,8 @@ void MainWindow::paintEvent(QPaintEvent *)
         {
             painter.drawLine(to_qt(intersection_point),
                              to_qt(point->get_screen_pivot()));
+            painter.setPen(QPen(point_color, 4));
+            painter.drawPoint(to_qt(intersection_point));
         } // else- line is under the label
 
         painter.setPen(QPen(point_color, 3));
