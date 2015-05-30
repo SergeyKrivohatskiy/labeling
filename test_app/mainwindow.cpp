@@ -24,8 +24,8 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
     timer(new QTimer()),
-    pos_optimizer(new labeling::ray_intersection_opt())
-//    pos_optimizer(new labeling::sim_annealing_opt())
+//    pos_optimizer(new labeling::ray_intersection_opt())
+    pos_optimizer(new labeling::sim_annealing_opt())
 {
     ui->setupUi(this);
 
@@ -152,10 +152,12 @@ void MainWindow::paintEvent(QPaintEvent *)
         painter.drawRect(QRect(label_left_bottom,
                                to_qt(point->get_label_size())));
         painter.setPen(QPen(Qt::red, 1));
+        painter.setOpacity(0.2);
         for(const point_i &track_point: point->get_track())
         {
             painter.drawPoint(to_qt(track_point));
         }
+        painter.setOpacity(1);
     }
 }
 
